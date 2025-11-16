@@ -95,11 +95,6 @@
           </div>
 
           <div class="col-md-6">
-            <label class="form-label">Versão</label>
-            <input type="text" class="form-control" name="versao">
-          </div>
-
-          <div class="col-md-6">
             <label class="form-label">Código de Catálogo</label>
             <input type="text" class="form-control" name="codigo">
           </div>
@@ -110,10 +105,6 @@
       <div class="card mb-4">
         <div class="card-header bg-primary text-white">Informações da Capa</div>
         <div class="card-body row g-3">
-          <div class="col-md-4">
-            <label class="form-label">Tipo de Embalagem</label>
-            <input type="text" class="form-control" name="embalagem">
-          </div>
           <div class="col-md-2">
             <label class="form-label">Com Encarte Original?</label>
             <select class="form-select" name="encarte">
@@ -160,10 +151,12 @@
             <input type="text" class="form-control" name="numero_edicao">
           </div>
           <div class="col-md-4">
-            <label class="form-label">Primeira Prensagem / Reedição</label>
+            <label class="form-label">Versão</label>
             <select class="form-select" name="prensagem">
               <option>Primeira Prensagem</option>
               <option>Reedição</option>
+              <option>Delux</option>
+              <option>Super delux</option>
             </select>
           </div>
           <div class="col-md-4">
@@ -176,6 +169,18 @@
         </div>
       </div>
 
+      <!-- OBSERVAÇÕES -->
+  <div class="card mb-4">
+    <div class="card-header bg-primary text-white">Observações</div>
+    <div class="card-body">
+     <label class="form-label">Observações do Produto (opcional)</label>
+      <textarea class="form-control" name="observacoes" rows="4" placeholder="Ex: Pequenos riscos, capa levemente amarelada, edição rara, etc."></textarea>
+    </div>
+  </div>
+
+
+      
+
       <!-- BOTÃO DE CADASTRO -->
       <div class="text-end">
         <button type="button" class="btn btn-success" id="abrirModalBtn">Cadastrar</button>
@@ -183,60 +188,96 @@
     </form>
   </div>
 
-  <!-- Modal -->
-  <div class="modal fade" id="confirmarCadastroModal" tabindex="-1" aria-labelledby="confirmarCadastroLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title" id="confirmarCadastroLabel">Confirmar Cadastro</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <h6 class="fw-bold mb-3">Confira os dados antes de confirmar:</h6>
-          <div id="resumoCadastro"></div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Voltar</button>
-          <button type="submit" form="formCadastro" class="btn btn-success" id="confirmarCadastroBtn">Confirmar Cadastro</button>
-        </div>
+  
+ <!-- Modal -->
+<div class="modal fade" id="confirmarCadastroModal" tabindex="-1" aria-labelledby="confirmarCadastroLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="confirmarCadastroLabel">Confirmar Cadastro</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
+
+      <div class="modal-body">
+
+        <div class="row">
+          
+          <!-- COLUNA DOS DADOS -->
+          <div class="col-md-8">
+            <h6 class="fw-bold mb-3">Confira os dados antes de confirmar:</h6>
+            <div id="resumoCadastro"></div>
+          </div>
+
+          <!-- COLUNA DA IMAGEM + OBS -->
+          <div class="col-md-4">
+            <div class="text-center">
+              <img id="previewImagem" class="img-thumbnail mb-3 fade-in" style="max-width: 100%; display: none; ">
+            </div>
+
+            <div class="card fade-in">
+              <div class="card-header fw-bold">Observações</div>
+              <div class="card-body">
+                <p id="previewObservacoes" class="text-muted">Nenhuma observação.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Voltar</button>
+        <button type="submit" form="formCadastro" class="btn btn-success">Confirmar Cadastro</button>
+      </div>
+
     </div>
   </div>
+</div>
+
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    document.getElementById("abrirModalBtn").addEventListener("click", function() {
-      const form = document.getElementById("formCadastro");
-      const dados = new FormData(form);
-      let resumoHTML = "<ul class='list-group'>";
+        document.getElementById("abrirModalBtn").addEventListener("click", function () {
+    const form = document.getElementById("formCadastro");
+    const dados = new FormData(form);
 
-      dados.forEach((valor, chave) => {
-        if (chave !== "imagemCapa") {
-          resumoHTML += `<li class='list-group-item'><strong>${chave}:</strong> ${valor || "<em>não informado</em>"}</li>`;
+    let resumoHTML = "<ul class='list-group mb-3'>";
+
+    dados.forEach((valor, chave) => {
+        if (chave !== "imagemCapa" && chave !== "observacoes") {
+            resumoHTML += `
+                <li class="list-group-item">
+                    <strong>${chave}:</strong> ${valor || "<em>não informado</em>"}
+                </li>`;
         }
-      });
-
-      const imagem = document.getElementById("imagemCapa").files[0];
-      if (imagem) {
-        const urlImagem = URL.createObjectURL(imagem);
-        resumoHTML += `
-          <li class='list-group-item'>
-            <strong>Imagem da Capa:</strong><br>
-            <img src="${urlImagem}" alt="Prévia da capa" class="img-thumbnail mt-2" style="max-width: 200px;">
-          </li>`;
-      }
-
-      resumoHTML += "</ul>";
-      document.getElementById("resumoCadastro").innerHTML = resumoHTML;
-      new bootstrap.Modal(document.getElementById("confirmarCadastroModal")).show();
     });
 
-     // quando clicar em Confirmar Cadastro, envia o form
-    document.getElementById("confirmarCadastroBtn").addEventListener("click", function () {
-    document.getElementById("formCadastro").submit();
-    });
+    resumoHTML += "</ul>";
+    document.getElementById("resumoCadastro").innerHTML = resumoHTML;
+
+    // OBSERVAÇÕES
+    const obs = dados.get("observacoes")?.trim();
+    document.getElementById("previewObservacoes").innerHTML =
+        obs ? obs : "<em>nenhuma observação</em>";
+
+    // IMAGEM
+    const imagem = document.getElementById("imagemCapa").files[0];
+    const imgPreview = document.getElementById("previewImagem");
+
+    if (imagem) {
+        imgPreview.src = URL.createObjectURL(imagem);
+        imgPreview.style.display = "block";
+    } else {
+        imgPreview.style.display = "none";
+    }
+
+    new bootstrap.Modal(document.getElementById("confirmarCadastroModal")).show();
+});
+
 
   </script>
 

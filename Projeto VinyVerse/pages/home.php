@@ -27,6 +27,8 @@ if (!isset($_SESSION['user'])) {
   <?php include '../components/appbar.php'; ?>
 
   <!-- Conteúdo principal -->
+  <?php include '../components/gridView.php'; ?>
+
   
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

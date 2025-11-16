@@ -22,6 +22,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $genero_musical = $_POST['genero'] ?? '';
         $formato        = $_POST['formato'] ?? '';
         $continente     = $_POST['continente'] ?? '';
+        $observacoes    = $_POST['observacoes'] ?? '';
+
 
         // ======== UPLOAD DE IMAGEM ========
         $imagem_capa = null;
@@ -37,11 +39,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         // ======== INSERE EM PRODUTOS ========
         $sql_produto = "INSERT INTO produtos 
-            (usuario_id, titulo_album, artista_banda, ano_lancamento, genero_musical, formato, continente, imagem_capa)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            (usuario_id, titulo_album, artista_banda, ano_lancamento, genero_musical, formato, continente, imagem_capa, observacoes)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
         $stmt = $conn->prepare($sql_produto);
-        $stmt->bind_param(
-            "isssssss",
+        $stmt->bind_param
+        ("issssssss",
             $usuario_id,
             $titulo_album,
             $artista_banda,
@@ -49,14 +52,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $genero_musical,
             $formato,
             $continente,
-            $imagem_capa
+            $imagem_capa,
+            $observacoes
         );
         $stmt->execute();
         $produto_id = $stmt->insert_id;
         $stmt->close();
 
         // ======== DADOS DO DISCO ========
-        $condicao_disco  = $_POST['condicao_disco'] ?? '';
         $versao          = $_POST['versao'] ?? '';
         $codigo_catalogo = $_POST['codigo'] ?? '';
 

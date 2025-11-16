@@ -34,6 +34,7 @@ else{
     <title>Login - VinyVerse</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
+    
 </head>
 <body class="bg-light">
 
@@ -72,6 +73,7 @@ else{
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-<script src="assets/js/script.js"></script>
+<canvas id="fireworksCanvas"></canvas>
+<script src="assets/js/firewords.js"></script>
 </body>
 </html>
