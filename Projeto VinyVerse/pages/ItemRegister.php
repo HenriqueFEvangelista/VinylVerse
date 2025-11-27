@@ -5,14 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cadastro de Produto - VinilVerse</title>
 
-  <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 
 <body class="bg-light">
 
-  <!-- Botão Voltar -->
   <button type="button" class="btn btn-danger position-fixed top-0 start-0 m-3 shadow-sm" onclick="window.history.back()">
     <i class="bi bi-arrow-left"></i> Voltar
   </button>
@@ -20,8 +18,7 @@
   <div class="container my-5">
     <h2 class="text-center mb-4">Cadastro de Produto</h2>
 
-    <!-- 🔹 FORMÚLARIO PRINCIPAL (apenas um form agora) -->
-   <form id="formCadastro" method="POST" action="salvar_produto.php" enctype="multipart/form-data">
+    <form id="formCadastro" method="POST" action="../actions/salvar_produto.php" enctype="multipart/form-data">
 
       <!-- INFORMAÇÕES GERAIS -->
       <div class="card mb-4">
@@ -66,7 +63,7 @@
           </div>
 
           <div class="col-md-6">
-            <label for="continente" class="form-label fw-bold">Continente de origem</label>
+            <label class="form-label fw-bold">Continente de origem</label>
             <select class="form-select" id="continente" name="continente">
               <option selected disabled>Selecione a origem...</option>
               <option value="nacional">Nacional (Não Importado)</option>
@@ -91,6 +88,14 @@
               <option value="disco_excellent">Excellent (Excelente)</option>
               <option value="disco_near_mint">Near Mint (Quase Perfeito)</option>
               <option value="disco_mint">Mint (Perfeito / Novo)</option>
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Embalagem</label>
+            <select class="form-select" name="embalagem">
+              <option value="Lacrado">Lacrado</option>
+              <option value="Aberto">Aberto</option>
             </select>
           </div>
 
@@ -170,115 +175,99 @@
       </div>
 
       <!-- OBSERVAÇÕES -->
-  <div class="card mb-4">
-    <div class="card-header bg-primary text-white">Observações</div>
-    <div class="card-body">
-     <label class="form-label">Observações do Produto (opcional)</label>
-      <textarea class="form-control" name="observacoes" rows="4" placeholder="Ex: Pequenos riscos, capa levemente amarelada, edição rara, etc."></textarea>
-    </div>
-  </div>
+      <div class="card mb-4">
+        <div class="card-header bg-primary text-white">Observações</div>
+        <div class="card-body">
+          <label class="form-label">Observações do Produto (opcional)</label>
+          <textarea class="form-control" name="observacoes" rows="4" placeholder="Ex: Pequenos riscos, capa levemente amarelada, edição rara, etc."></textarea>
+        </div>
+      </div>
 
-
-      
-
-      <!-- BOTÃO DE CADASTRO -->
       <div class="text-end">
         <button type="button" class="btn btn-success" id="abrirModalBtn">Cadastrar</button>
       </div>
     </form>
   </div>
 
-  
- <!-- Modal -->
-<div class="modal fade" id="confirmarCadastroModal" tabindex="-1" aria-labelledby="confirmarCadastroLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered">
-    <div class="modal-content">
+  <!-- Modal -->
+  <div class="modal fade" id="confirmarCadastroModal" tabindex="-1" aria-labelledby="confirmarCadastroLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+      <div class="modal-content">
 
-      <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title" id="confirmarCadastroLabel">Confirmar Cadastro</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title" id="confirmarCadastroLabel">Confirmar Cadastro</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
 
-      <div class="modal-body">
-
-        <div class="row">
-          
-          <!-- COLUNA DOS DADOS -->
-          <div class="col-md-8">
-            <h6 class="fw-bold mb-3">Confira os dados antes de confirmar:</h6>
-            <div id="resumoCadastro"></div>
-          </div>
-
-          <!-- COLUNA DA IMAGEM + OBS -->
-          <div class="col-md-4">
-            <div class="text-center">
-              <img id="previewImagem" class="img-thumbnail mb-3 fade-in" style="max-width: 100%; display: none; ">
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-8">
+              <h6 class="fw-bold mb-3">Confira os dados antes de confirmar:</h6>
+              <div id="resumoCadastro"></div>
             </div>
 
-            <div class="card fade-in">
-              <div class="card-header fw-bold">Observações</div>
-              <div class="card-body">
-                <p id="previewObservacoes" class="text-muted">Nenhuma observação.</p>
+            <div class="col-md-4">
+              <div class="text-center">
+                <img id="previewImagem" class="img-thumbnail mb-3 fade-in" style="max-width: 100%; display: none;">
+              </div>
+
+              <div class="card fade-in">
+                <div class="card-header fw-bold">Observações</div>
+                <div class="card-body">
+                  <p id="previewObservacoes" class="text-muted">Nenhuma observação.</p>
+                </div>
               </div>
             </div>
-          </div>
 
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Voltar</button>
+          <button type="submit" form="formCadastro" class="btn btn-success">Confirmar Cadastro</button>
         </div>
 
       </div>
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Voltar</button>
-        <button type="submit" form="formCadastro" class="btn btn-success">Confirmar Cadastro</button>
-      </div>
-
     </div>
   </div>
-</div>
 
-
-  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-        document.getElementById("abrirModalBtn").addEventListener("click", function () {
-    const form = document.getElementById("formCadastro");
-    const dados = new FormData(form);
+    document.getElementById("abrirModalBtn").addEventListener("click", function () {
+      const form = document.getElementById("formCadastro");
+      const dados = new FormData(form);
 
-    let resumoHTML = "<ul class='list-group mb-3'>";
+      let resumoHTML = "<ul class='list-group mb-3'>";
 
-    dados.forEach((valor, chave) => {
+      dados.forEach((valor, chave) => {
         if (chave !== "imagemCapa" && chave !== "observacoes") {
-            resumoHTML += `
-                <li class="list-group-item">
-                    <strong>${chave}:</strong> ${valor || "<em>não informado</em>"}
-                </li>`;
+          resumoHTML += `
+            <li class="list-group-item">
+              <strong>${chave}:</strong> ${valor || "<em>não informado</em>"}
+            </li>`;
         }
-    });
+      });
 
-    resumoHTML += "</ul>";
-    document.getElementById("resumoCadastro").innerHTML = resumoHTML;
+      resumoHTML += "</ul>";
+      document.getElementById("resumoCadastro").innerHTML = resumoHTML;
 
-    // OBSERVAÇÕES
-    const obs = dados.get("observacoes")?.trim();
-    document.getElementById("previewObservacoes").innerHTML =
+      const obs = dados.get("observacoes")?.trim();
+      document.getElementById("previewObservacoes").innerHTML =
         obs ? obs : "<em>nenhuma observação</em>";
 
-    // IMAGEM
-    const imagem = document.getElementById("imagemCapa").files[0];
-    const imgPreview = document.getElementById("previewImagem");
+      const imagem = document.getElementById("imagemCapa").files[0];
+      const imgPreview = document.getElementById("previewImagem");
 
-    if (imagem) {
+      if (imagem) {
         imgPreview.src = URL.createObjectURL(imagem);
         imgPreview.style.display = "block";
-    } else {
+      } else {
         imgPreview.style.display = "none";
-    }
+      }
 
-    new bootstrap.Modal(document.getElementById("confirmarCadastroModal")).show();
-});
-
-
+      new bootstrap.Modal(document.getElementById("confirmarCadastroModal")).show();
+    });
   </script>
 
 </body>

@@ -1,13 +1,4 @@
-<?php
-if (session_status() === PHP_SESSION_NONE) {
-  session_start();
-}
-
-if (!isset($_SESSION['user'])) {
-  header("Location: ../index.php");
-  exit();
-}
-?>
+<?php include '../components/auth.php'; ?>
 
 <!-- Bootstrap 5 -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -29,7 +20,7 @@ if (!isset($_SESSION['user'])) {
 
     <!-- Campo de pesquisa -->
     <form class="d-flex ms-auto gap5" role="search" style="max-width: 250px;">
-      <input class="form-control me-2" type="search" placeholder="Pesquisar..." aria-label="Search">
+      <input id="pesquisa" class="form-control me-2" type="search" placeholder="Pesquisar..." aria-label="Search">
     </form>
 
 
@@ -41,15 +32,13 @@ if (!isset($_SESSION['user'])) {
 
 
     <!-- Filtro -->
-    <select class="form-select w-auto gap5">
+    <select id="filtro" class="form-select w-auto gap5">
       <option value="">Filtrar por...</option>
-      <option value="lp">LP</option>
-      <option value="cd">CD</option>
-      <option value="setbox-lp">Set Box LP</option>
-      <option value="setbox-cd">Set Box CD</option>
-      <option value="ano-asc">Ano ↑</option>
-      <option value="ano-desc">Ano ↓</option>
-    </select>
+      <option value="LP">LP</option>
+      <option value="CD">CD</option>
+      <option value="Set Box LP">Set Box LP</option>
+      <option value="Set Box CD">Set Box CD</option>
+  </select>
   </div>
 </nav>
 
@@ -59,7 +48,7 @@ if (!isset($_SESSION['user'])) {
     <h4 class="offcanvas-title fw-bold textefont" id="sidebarLabel">VinilVerse</h4>
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
   </div>
-  <div class="offcanvas-body">
+  <div class="offcanvas-body ">
     <ul class="list-group list-group-flush custom-slidemenu">
       <li class="list-group-item"><a href="../pages/userAccount.php" class="text-decoration-none text-dark">Minha Conta</a></li>
       <li class="list-group-item"><a href="../pages/pageConfig.php" class="text-decoration-none text-dark">Configurações</a></li>

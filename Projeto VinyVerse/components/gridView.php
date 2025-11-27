@@ -1,28 +1,19 @@
 <?php
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-
 include '../config/db.php';
-
-if (!isset($_SESSION['user_id'])) {
-    header("Location: ../index.php");
-    exit;
-}
+include '../components/auth.php'; 
 
 $usuario_id = $_SESSION['user_id'];
 
 $sql = "
 SELECT 
-    p.id AS produto_id, p.titulo_album, p.artista_banda, p.imagem_capa, p.observacoes,
+    p.id AS produto_id, p.titulo_album, p.artista_banda, p.imagem_capa, p.observacoes, p.formato,
 
     d.condicao_disco, d.versao, d.codigo_catalogo,
 
     c.tipo_embalagem, c.condicao_capa, c.encarte_original, c.obi,
 
-    e.edicao_limitada, e.numero_edicao, e.prensagem, e.assinado
+    e.edicao_limitada, e.numero_edicao, e.assinado
 
 FROM produtos p
 LEFT JOIN disco_info d ON p.id = d.produto_id
@@ -39,39 +30,23 @@ $stmt->execute();
 $result = $stmt->get_result();
 ?>
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
-
-<style>
-.grid-card {
-    cursor: pointer;
-    transition: transform .2s ease, box-shadow .2s ease;
-    border-radius: 10px;
-}
-.grid-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 18px rgba(0,0,0,0.15);
-}
-.card-img-top {
-    height: 180px;
-    object-fit: cover;
-    border-radius: 10px 10px 0 0;
-}
-.modal-img {
-    width: 200px;
-    border-radius: 10px;
-}
-
-.editbtn{
-   background: #ADD8E6;
-}
-</style>
+<link rel="stylesheet" href="../assets/css/gridView.css">
 
 <div class="container mt-4">
     <div class="row g-4">
 
         <?php while ($row = $result->fetch_assoc()): ?>
-            <div class="col-6 col-md-4 col-xl-2">
-                <div class="card grid-card" 
+
+            <?php
+                $tituloEsc = htmlspecialchars(strtolower($row['titulo_album']));
+                $artistaEsc = htmlspecialchars(strtolower($row['artista_banda']));
+            ?>
+
+            <div class="col-6 col-md-4 col-xl-2 item-card-wrapper">
+                <div class="card grid-card"
+                     data-formato="<?= $row['formato'] ?>"
+                     data-titulo="<?= $tituloEsc ?>"
+                     data-artista="<?= $artistaEsc ?>"
                      onclick="abrirDetalhes(<?= $row['produto_id'] ?>)"
                      data-bs-toggle="modal"
                      data-bs-target="#modalDetalhes">
@@ -81,16 +56,16 @@ $result = $stmt->get_result();
                          alt="Capa">
 
                     <div class="card-body text-center">
-                        <h6 class="mb-1 fw-bold"><?= $row['titulo_album'] ?></h6>
-                        <p class="text-muted small mb-0"><?= $row['artista_banda'] ?></p>
+                        <h6 class="mb-1 fw-bold"><?= htmlspecialchars($row['titulo_album']) ?></h6>
+                        <p class="text-muted small mb-0"><?= htmlspecialchars($row['artista_banda']) ?></p>
                     </div>
                 </div>
             </div>
 
-            <!-- Guarda os dados para o JS -->
             <script>
-            window["produto_<?= $row['produto_id'] ?>"] = <?= json_encode($row) ?>;
+                window["produto_<?= $row['produto_id'] ?>"] = <?= json_encode($row) ?>;
             </script>
+
         <?php endwhile; ?>
 
     </div>
@@ -101,7 +76,7 @@ $result = $stmt->get_result();
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
 
-            <div class="modal-header bg-primary text-white">
+            <div class="modal-header text-white" style="background: #6c63ff;">
                 <h5 class="modal-title">Detalhes do Item</h5>
                 <button class="btn-close" data-bs-dismiss="modal"></button>
             </div>
@@ -109,29 +84,38 @@ $result = $stmt->get_result();
             <div class="modal-body">
                 <div class="row">
 
-                    <div class="col-md-4 text-center">
-                        <img id="modal_img" class="modal-img mb-3">
-                    </div>
+                <div class="col-md-4 text-center">
+                    <img id="modal_img" class="modal-img mb-3">
+                </div>
 
-                    <div class="col-md-8">
+                <div class="col-md-8">
+                    <div class="modal-info-wrapper">
                         <div id="modal_info"></div>
                     </div>
+                </div>
 
                 </div>
             </div>
 
             <div class="modal-footer">
                 <button class="btn btn-secondary" data-bs-dismiss="modal">Voltar</button>
-                <button class="btn editbtn">Editar</button>
-                <button class="btn btn-danger">Excluir</button>
+                <button class="btn btn-primary" onclick="editarProduto()">Editar</button>
+                <button class="btn btn-danger btn-excluir">Excluir</button>
             </div>
 
         </div>
     </div>
 </div>
 
+
 <script>
+/* ==========================
+      ABRIR DETALHES
+========================== */
+let produtoAtual = null;
+
 function abrirDetalhes(id) {
+    produtoAtual = id;
     const data = window["produto_" + id];
 
     document.getElementById("modal_img").src = "../assets/uploads/" + data.imagem_capa;
@@ -150,10 +134,74 @@ function abrirDetalhes(id) {
         <hr>
         <p><b>Edição Limitada:</b> ${data.edicao_limitada}</p>
         <p><b>N° Edição:</b> ${data.numero_edicao}</p>
-        <p><b>Prensagem:</b> ${data.prensagem}</p>
         <p><b>Assinado:</b> ${data.assinado}</p>
         <hr>
         <p><b>Observações:</b><br> ${data.observacoes ?? "<i>Sem observações</i>"}</p>
     `;
 }
+
+
+/* ==========================
+      EXCLUIR ITEM
+========================== */
+document.addEventListener("click", function(e) {
+    if (e.target.classList.contains("btn-excluir")) {
+
+        if (!produtoAtual) return;
+
+        if (!confirm("Tem certeza que deseja excluir este item?")) return;
+
+        fetch("../actions/excluir_produto.php?id=" + produtoAtual)
+        .then(r => r.text())
+        .then(() => {
+            alert("Produto excluído!");
+            location.reload();
+        });
+    }
+});
+
+
+/* ==========================
+      EDITAR ITEM
+========================== */
+function editarProduto() {
+    if (!produtoAtual) return;
+
+    window.location.href = "../pages/editar_produto.php?id=" + produtoAtual;
+}
+
+
+/* ==========================
+      FILTRO (JS PURO)
+========================== */
+
+const inputPesquisa = document.getElementById("pesquisa");
+const selectFiltro = document.getElementById("filtro");
+
+function aplicarFiltros() {
+    const termo = (inputPesquisa?.value || "").toLowerCase();
+    const formatoSelecionado = selectFiltro?.value || "";
+
+    const cards = document.querySelectorAll(".grid-card");
+
+    cards.forEach(card => {
+        const titulo = card.dataset.titulo;
+        const artista = card.dataset.artista;
+        const formato = card.dataset.formato;
+
+        const matchPesquisa =
+            titulo.includes(termo) ||
+            artista.includes(termo);
+
+        const matchFormato =
+            formatoSelecionado === "" || formato === formatoSelecionado;
+
+        card.parentElement.style.display = (matchPesquisa && matchFormato)
+            ? "block"
+            : "none";
+    });
+}
+
+if (inputPesquisa) inputPesquisa.addEventListener("input", aplicarFiltros);
+if (selectFiltro) selectFiltro.addEventListener("change", aplicarFiltros);
 </script>

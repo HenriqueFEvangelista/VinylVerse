@@ -7,7 +7,7 @@
 }
 
 .custom-slidemenu{
-  border-radius: 5px;
+  border-radius: 10px !important;
 }
 
 .textefont{
@@ -17,4 +17,11 @@
 .gap5{
   gap: 5px;
 }
+
+#modal_info {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+}
+
 

@@ -1,0 +1,61 @@
+.grid-card {
+    cursor: pointer;
+    transition: transform .2s ease, box-shadow .2s ease;
+    border-radius: 10px;
+}
+.grid-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+}
+.card-img-top {
+    height: 180px;
+    object-fit: cover;
+    border-radius: 10px 10px 0 0;
+}
+.modal-img {
+    width: 200px;
+    border-radius: 10px;
+}
+
+.modalColor{
+   background: #6c63ff !important;
+}
+
+#modal_info {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+}
+
+#modal_info p {
+    max-width: 100%;
+    word-break: break-word;
+}
+
+/* Área de informações com scroll elegante */
+.modal-info-wrapper {
+    max-height: 60vh;    /* Altura máxima antes do scroll aparecer */
+    overflow-y: auto;    /* Mostra scroll só quando for preciso */
+    padding-right: 10px; /* Espaço para não grudar na borda */
+    scrollbar-width: thin;          /* Firefox */
+    scrollbar-color: #b5b5b5 #e9e9e9; /* Firefox */
+}
+
+/* Scrollbar elegante - Chrome, Edge e Safari */
+.modal-info-wrapper::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-info-wrapper::-webkit-scrollbar-track {
+    background: #e9e9e9;
+    border-radius: 10px;
+}
+
+.modal-info-wrapper::-webkit-scrollbar-thumb {
+    background: #b5b5b5;
+    border-radius: 10px;
+}
+
+.modal-info-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #9a9a9a;
+}
