@@ -1,2 +1,24 @@
-# Ignorar imagens enviadas pelo usuário
+# Arquivos sensíveis
+.env
 assets/uploads/
+
+# Composer
+/vendor/
+
+# Logs
+*.log
+
+# Cache
+.cache/
+tmp/
+*.tmp
+
+# IDEs
+.vscode/
+.idea/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+

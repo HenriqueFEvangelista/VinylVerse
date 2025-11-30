@@ -1,64 +1,70 @@
 <?php include '../components/auth.php'; ?>
 
-<!-- Bootstrap 5 -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/appbar.css">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-<nav class="navbar navbar-expand-lg navbar-dark px-3 custom-navbar">
+<nav class="navbar navbar-expand-lg px-3 custom-navbar" data-bs-theme="dark">
   <div class="container-fluid">
-    
-    <!-- Botão para abrir o menu lateral -->
-    <button class="btn btn-light me-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu">
+
+    <button class="btn btn-outline-light me-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu">
       <i class="bi bi-list"></i>
     </button>
 
-    <!-- Texto de boas-vindas -->
     <span class="navbar-brand fw-bold">
       Bem-vindo, <?= htmlspecialchars($_SESSION['user']); ?> 👋
     </span>
 
-    <!-- Campo de pesquisa -->
-    <form class="d-flex ms-auto gap5" role="search" style="max-width: 250px;">
-      <input id="pesquisa" class="form-control me-2" type="search" placeholder="Pesquisar..." aria-label="Search">
-    </form>
+    <div class="d-flex align-items-center ms-auto gap-3">
 
+      <form class="d-flex" role="search" style="max-width: 250px;">
+        <input id="pesquisa" class="form-control" type="search" placeholder="Pesquisar...">
+      </form>
 
-    <!-- Botão Adicionar-->
-    <a href="../pages/ItemRegister.php" class="btn btn-light d-flex align-items-center me-3 gap-2" id="addItemBtn">
-      <i class="bi bi-plus-circle me-2"></i> Adicionar
-    </a>
+      <a href="../pages/ItemRegister.php" class="btn btn-outline-light d-flex align-items-center gap-2" id="addItemBtn">
+        <i class="bi bi-plus-circle"></i> Adicionar
+      </a>
 
+      <select id="filtro" class="form-select w-auto">
+        <option value="">Filtrar por...</option>
+        <option value="LP">LP</option>
+        <option value="CD">CD</option>
+        <option value="Set Box LP">Set Box LP</option>
+        <option value="Set Box CD">Set Box CD</option>
+      </select>
 
+      <button id="themeToggle" class="btn btn-outline-light">
+        <i class="bi bi-moon-fill" id="themeIcon"></i>
+      </button>
 
-    <!-- Filtro -->
-    <select id="filtro" class="form-select w-auto gap5">
-      <option value="">Filtrar por...</option>
-      <option value="LP">LP</option>
-      <option value="CD">CD</option>
-      <option value="Set Box LP">Set Box LP</option>
-      <option value="Set Box CD">Set Box CD</option>
-  </select>
+    </div>
+
   </div>
 </nav>
 
-<!-- Menu lateral (Offcanvas Bootstrap) -->
-<div class="offcanvas offcanvas-start custom-offcanvas" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarLabel">
+
+<div class="offcanvas offcanvas-start custom-offcanvas" id="sidebarMenu" data-bs-theme="dark">
   <div class="offcanvas-header">
-    <h4 class="offcanvas-title fw-bold textefont" id="sidebarLabel">VinilVerse</h4>
-    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+    <h4 class="offcanvas-title fw-bold textefont">VinilVerse</h4>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
   </div>
-  <div class="offcanvas-body ">
-    <ul class="list-group list-group-flush custom-slidemenu">
-      <li class="list-group-item"><a href="../pages/userAccount.php" class="text-decoration-none text-dark">Minha Conta</a></li>
-      <li class="list-group-item"><a href="../pages/pageConfig.php" class="text-decoration-none text-dark">Configurações</a></li>
-      <li class="list-group-item"><a href="../pages/mercado.php" class="text-decoration-none text-dark">Mercado</a></li>
-      <li class="list-group-item">
-        <a href="../assets/auth/logout.php" class="btn btn-danger w-100">Sair</a>
-      </li>
-    </ul>
+
+  <div class="offcanvas-body d-flex flex-column gap-2">
+
+    <a href="../pages/userAccount.php" class="btn btn-outline-light w-100 text-start">
+      <i class="bi bi-person-fill me-2"></i> Minha Conta
+    </a>
+
+    <a href="../pages/pageConfig.php" class="btn btn-outline-light w-100 text-start">
+      <i class="bi bi-gear-fill me-2"></i> Configurações
+    </a>
+
+    <a href="../pages/mercado.php" class="btn btn-outline-light w-100 text-start">
+      <i class="bi bi-shop me-2"></i> Mercado
+    </a>
+
+    <button class="btn btn-danger w-100 text-start mt-3" data-bs-toggle="modal" data-bs-target="#logoutModal">
+      <i class="bi bi-box-arrow-right me-2"></i> Sair
+    </button>
+
   </div>
 </div>
-
-<!-- Ícones Bootstrap -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">

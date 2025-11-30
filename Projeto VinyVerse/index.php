@@ -17,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($user && password_verify($password, $user['password'])) {
     $_SESSION['user'] = $user['username'];
-    $_SESSION['user_id'] = $user['id']; // 🔹 Adiciona o ID do usuário na sessão
+    $_SESSION['user_id'] = $user['id']; 
     header("Location: pages/home.php");
     exit;
     }

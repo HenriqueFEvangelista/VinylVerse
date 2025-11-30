@@ -7,13 +7,26 @@ $usuario_id = $_SESSION['user_id'];
 
 $sql = "
 SELECT 
-    p.id AS produto_id, p.titulo_album, p.artista_banda, p.imagem_capa, p.observacoes, p.formato,
+    p.id AS produto_id, 
+    p.titulo_album, 
+    p.artista_banda, 
+    p.imagem_capa, 
+    p.observacoes, 
+    p.formato, 
+    p.continente,
 
-    d.condicao_disco, d.versao, d.codigo_catalogo,
+    d.condicao_disco, 
+    d.versao, 
+    d.codigo_catalogo,
 
-    c.tipo_embalagem, c.condicao_capa, c.encarte_original, c.obi,
+    c.tipo_embalagem, 
+    c.condicao_capa, 
+    c.encarte_original, 
+    c.obi,
 
-    e.edicao_limitada, e.numero_edicao, e.assinado
+    e.edicao_limitada, 
+    e.numero_edicao, 
+    e.assinado
 
 FROM produtos p
 LEFT JOIN disco_info d ON p.id = d.produto_id
@@ -23,6 +36,7 @@ LEFT JOIN edicao_info e ON p.id = e.produto_id
 WHERE p.usuario_id = ?
 ORDER BY p.id DESC
 ";
+
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $usuario_id);
@@ -120,25 +134,50 @@ function abrirDetalhes(id) {
 
     document.getElementById("modal_img").src = "../assets/uploads/" + data.imagem_capa;
 
+    const badge = (valor) => {
+        if (!valor) return `<span class="badge bg-secondary">N/A</span>`;
+        if (valor === "Sim") return `<span class="badge bg-success">Sim</span>`;
+        if (valor === "Não") return `<span class="badge bg-danger">Não</span>`;
+        return `<span class="badge bg-primary">${valor}</span>`;
+    };
+
     document.getElementById("modal_info").innerHTML = `
+
+        <h5 class="section-title">Informações do Álbum</h5>
         <p><b>Título:</b> ${data.titulo_album}</p>
         <p><b>Artista:</b> ${data.artista_banda}</p>
-        <p><b>Condição do Disco:</b> ${data.condicao_disco ?? "N/A"}</p>
-        <p><b>Versão:</b> ${data.versao ?? "N/A"}</p>
-        <p><b>Código:</b> ${data.codigo_catalogo ?? "N/A"}</p>
+        <p><b>Origem:</b> ${data.continente || "N/A"}</p>
+        <p><b>Formato:</b> ${data.formato}</p>
+
         <hr>
-        <p><b>Embalagem:</b> ${data.tipo_embalagem ?? "N/A"}</p>
-        <p><b>Condição da Capa:</b> ${data.condicao_capa ?? "N/A"}</p>
-        <p><b>Encarte:</b> ${data.encarte_original}</p>
-        <p><b>OBI:</b> ${data.obi}</p>
+
+        <h5 class="section-title">Disco</h5>
+        <p><b>Condição do Disco:</b> ${data.condicao_disco || "N/A"}</p>
+        <p><b>Versão:</b> ${data.versao || "N/A"}</p>
+        <p><b>Código de Catálogo:</b> ${data.codigo_catalogo || "N/A"}</p>
+
         <hr>
-        <p><b>Edição Limitada:</b> ${data.edicao_limitada}</p>
-        <p><b>N° Edição:</b> ${data.numero_edicao}</p>
-        <p><b>Assinado:</b> ${data.assinado}</p>
+
+        <h5 class="section-title">Capa e Embalagem</h5>
+        <p><b>Tipo de Embalagem:</b> ${data.tipo_embalagem || "N/A"}</p>
+        <p><b>Condição da Capa:</b> ${data.condicao_capa || "N/A"}</p>
+        <p><b>Encarte Original:</b> ${badge(data.encarte_original)}</p>
+        <p><b>OBI:</b> ${badge(data.obi)}</p>
+
         <hr>
-        <p><b>Observações:</b><br> ${data.observacoes ?? "<i>Sem observações</i>"}</p>
+
+        <h5 class="section-title">Edição</h5>
+        <p><b>Edição Limitada:</b> ${badge(data.edicao_limitada)}</p>
+        <p><b>Número da Edição:</b> ${data.numero_edicao || "N/A"}</p>
+        <p><b>Assinado:</b> ${badge(data.assinado)}</p>
+
+        <hr>
+
+        <h5 class="section-title">Observações</h5>
+        <p>${data.observacoes || "<i>Sem observações</i>"}</p>
     `;
 }
+
 
 
 /* ==========================

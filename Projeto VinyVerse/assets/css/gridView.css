@@ -59,3 +59,18 @@
 .modal-info-wrapper::-webkit-scrollbar-thumb:hover {
     background: #9a9a9a;
 }
+
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #6c63ff;
+    margin-bottom: 8px;
+}
+#modal_info p {
+    margin-bottom: 6px;
+}
+.modal-img {
+    width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 0 10px #0002;
+}
