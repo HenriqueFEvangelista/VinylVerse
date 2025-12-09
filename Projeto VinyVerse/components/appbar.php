@@ -3,7 +3,7 @@
 <link rel="stylesheet" href="../assets/css/appbar.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-<nav class="navbar navbar-expand-lg px-3 custom-navbar" data-bs-theme="dark">
+<nav class="navbar navbar-expand-lg px-3 custom-navbar fixed-top" data-bs-theme="dark">
   <div class="container-fluid">
 
     <button class="btn btn-outline-light me-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu">

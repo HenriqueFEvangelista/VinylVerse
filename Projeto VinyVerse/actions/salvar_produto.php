@@ -64,11 +64,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         // ======== INFORMAÇÕES DO DISCO ========
         $condicao_disco = $_POST['condicao_disco'] ?? '';
         $embalagem      = $_POST['embalagem'] ?? 'Aberto'; // Lacrado / Aberto
-        $versao         = ""; // campo exigido no banco, mas não existe no formulário
+        $versao = $_POST['versao'] ?? '';
         $codigo_catalogo = $_POST['codigo'] ?? '';
 
-        // Para garantir compatibilidade, salvamos "embalagem" em capa_info
-        // e não em disco_info (como o banco define).
         $sql_disco = "INSERT INTO disco_info (produto_id, condicao_disco, versao, codigo_catalogo)
                       VALUES (?, ?, ?, ?)";
 
@@ -93,14 +91,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         // ======== INFORMAÇÕES DA EDIÇÃO ========
         $limitada       = $_POST['limitada'] ?? 'Não';
         $numero_edicao  = $_POST['numero_edicao'] ?? '';
-        $prensagem      = $_POST['prensagem'] ?? 'Reedição';
+        $versao_edicao = $_POST['versao'] ?? 'Reedição';
         $assinado       = $_POST['assinado'] ?? 'Não';
 
-        $sql_edicao = "INSERT INTO edicao_info (produto_id, edicao_limitada, numero_edicao, prensagem, assinado)
-                       VALUES (?, ?, ?, ?, ?)";
+        $sql_edicao = "INSERT INTO edicao_info (produto_id, edicao_limitada, numero_edicao, versao, assinado)
+               VALUES (?, ?, ?, ?, ?)";
+
 
         $stmt = $conn->prepare($sql_edicao);
-        $stmt->bind_param("issss", $produto_id, $limitada, $numero_edicao, $prensagem, $assinado);
+        $stmt->bind_param("issss", $produto_id, $limitada, $numero_edicao, $versao_edicao, $assinado);
         $stmt->execute();
         $stmt->close();
 

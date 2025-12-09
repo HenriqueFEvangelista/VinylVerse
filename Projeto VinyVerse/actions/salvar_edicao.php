@@ -7,137 +7,173 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// Verifica se veio por POST
-if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+// Se não for POST, volta
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header("Location: ../pages/home.php");
     exit;
 }
 
+$usuario_id = $_SESSION['user_id'];
+$produto_id = intval($_POST['produto_id']);
+
 try {
-    $conn->begin_transaction();
-
-    // Dados principais
-    $produto_id     = intval($_POST['produto_id']);
-    $usuario_id     = $_SESSION['user_id'];
-
-    // Impede editar itens de outro usuário
-    $check = $conn->prepare("SELECT id FROM produtos WHERE id = ? AND usuario_id = ?");
+    // Verifica se o produto pertence ao usuário
+    $check = $conn->prepare("SELECT * FROM produtos WHERE id = ? AND usuario_id = ?");
     $check->bind_param("ii", $produto_id, $usuario_id);
     $check->execute();
-    $check_result = $check->get_result();
-
-    if ($check_result->num_rows === 0) {
-        throw new Exception("Este produto não pertence ao usuário.");
+    $result = $check->get_result();
+    if ($result->num_rows === 0) {
+        die("Acesso negado.");
     }
 
-    // === DADOS DO FORMULÁRIO ===
-    $titulo       = $_POST['titulo'];
-    $artista      = $_POST['artista'];
-    $ano          = $_POST['ano'];
-    $genero       = $_POST['genero'];
-    $formato      = $_POST['formato'];
-    $continente   = $_POST['continente'];
+    // Começar transação
+    $conn->begin_transaction();
 
-    $cond_disco   = $_POST['condicao_disco'];
-    $versao       = $_POST['versao'];
-    $codigo       = $_POST['codigo_catalogo'];
+    /* ---------------------------
+        1. UPLOAD DA IMAGEM
+    ---------------------------- */
 
-    $embalagem    = $_POST['embalagem'];
-    $cond_capa    = $_POST['condicao_capa'];
-    $encarte      = $_POST['encarte'];
-    $obi          = $_POST['obi'];
-
-    $limitada     = $_POST['edicao_limitada'];
-    $num_edicao   = $_POST['numero_edicao'];
-    $prensagem    = $_POST['prensagem'];
-    $assinado     = $_POST['assinado'];
-
-    $observacoes  = $_POST['observacoes'];
-
-    // === TRATAMENTO DA IMAGEM ===
-    $imagem_atual = $_POST['imagem_atual'];
-    $imagem_final = $imagem_atual;
+    $imagem_final = $_POST['imagem_atual']; // caso não troque
 
     if (!empty($_FILES['imagemCapa']['name'])) {
-        // Enviou nova imagem
-        $ext = pathinfo($_FILES['imagemCapa']['name'], PATHINFO_EXTENSION);
-        $novo_nome = uniqid("capa_") . ".$ext";
-        $destino = "../assets/uploads/" . $novo_nome;
 
-        if (move_uploaded_file($_FILES['imagemCapa']['tmp_name'], $destino)) {
+        $nomeArquivo = $_FILES['imagemCapa']['name'];
+        $tmp = $_FILES['imagemCapa']['tmp_name'];
 
-            // Apaga imagem antiga se existir
-            if (!empty($imagem_atual) && file_exists("../assets/uploads/" . $imagem_atual)) {
-                unlink("../assets/uploads/" . $imagem_atual);
+        $ext = strtolower(pathinfo($nomeArquivo, PATHINFO_EXTENSION));
+
+        // Extensões permitidas
+        $permitidas = ['jpg', 'jpeg', 'png', 'webp'];
+
+        if (!in_array($ext, $permitidas)) {
+            die("Formato de imagem inválido.");
+        }
+
+        // Novo nome único
+        $novoNome = "capa_" . uniqid() . "." . $ext;
+
+        $destino = "../assets/uploads/" . $novoNome;
+
+        if (move_uploaded_file($tmp, $destino)) {
+
+            // Apaga a imagem antiga
+            if (!empty($_POST['imagem_atual']) && file_exists("../assets/uploads/" . $_POST['imagem_atual'])) {
+                unlink("../assets/uploads/" . $_POST['imagem_atual']);
             }
 
-            $imagem_final = $novo_nome;
+            // Salva o novo nome
+            $imagem_final = $novoNome;
+
+        } else {
+            die("Erro ao fazer upload da imagem.");
         }
     }
 
-    // === UPDATE TABELA produtos ===
-    $sql_prod = "
-        UPDATE produtos SET
-            titulo_album = ?, artista_banda = ?, ano_lancamento = ?, 
-            genero_musical = ?, formato = ?, continente = ?, 
-            imagem_capa = ?, observacoes = ?
-        WHERE id = ? AND usuario_id = ?
-    ";
 
-    $stmt = $conn->prepare($sql_prod);
-    $stmt->bind_param(
+    /* ---------------------------
+        2. UPDATE TABELA PRODUTOS
+    ---------------------------- */
+
+    $sql = $conn->prepare("
+        UPDATE produtos
+        SET titulo_album=?, artista_banda=?, ano_lancamento=?, genero_musical=?, formato=?, continente=?, imagem_capa=?, observacoes=?
+        WHERE id=? AND usuario_id=?
+    ");
+
+    $sql->bind_param(
         "ssisssssii",
-        $titulo, $artista, $ano, $genero, $formato, $continente,
-        $imagem_final, $observacoes, $produto_id, $usuario_id
+        $_POST['titulo'],
+        $_POST['artista'],
+        $_POST['ano'],
+        $_POST['genero'],
+        $_POST['formato'],
+        $_POST['continente'],
+        $imagem_final,
+        $_POST['observacoes'],
+        $produto_id,
+        $usuario_id
     );
-    $stmt->execute();
-    $stmt->close();
 
-    // === UPDATE disco_info ===
-    $sql_disco = "
-        UPDATE disco_info SET
-            condicao_disco = ?, versao = ?, codigo_catalogo = ?
-        WHERE produto_id = ?
-    ";
+    $sql->execute();
 
-    $stmt = $conn->prepare($sql_disco);
-    $stmt->bind_param("sssi", $cond_disco, $versao, $codigo, $produto_id);
-    $stmt->execute();
-    $stmt->close();
 
-    // === UPDATE capa_info ===
-    $sql_capa = "
-        UPDATE capa_info SET
-            tipo_embalagem = ?, condicao_capa = ?, encarte_original = ?, obi = ?
-        WHERE produto_id = ?
-    ";
+    /* ---------------------------
+        3. UPDATE CAPA_INFO
+    ---------------------------- */
 
-    $stmt = $conn->prepare($sql_capa);
-    $stmt->bind_param("ssssi", $embalagem, $cond_capa, $encarte, $obi, $produto_id);
-    $stmt->execute();
-    $stmt->close();
+    $sqlCapa = $conn->prepare("
+        UPDATE capa_info
+        SET tipo_embalagem=?, condicao_capa=?, encarte_original=?, obi=?
+        WHERE produto_id=?
+    ");
 
-    // === UPDATE edicao_info ===
-    $sql_edicao = "
-        UPDATE edicao_info SET
-            edicao_limitada = ?, numero_edicao = ?, prensagem = ?, assinado = ?
-        WHERE produto_id = ?
-    ";
+    $sqlCapa->bind_param(
+        "ssssi",
+        $_POST['embalagem'],
+        $_POST['condicao_capa'],
+        $_POST['encarte'],
+        $_POST['obi'],
+        $produto_id
+    );
 
-    $stmt = $conn->prepare($sql_edicao);
-    $stmt->bind_param("ssssi", $limitada, $num_edicao, $prensagem, $assinado, $produto_id);
-    $stmt->execute();
-    $stmt->close();
+    $sqlCapa->execute();
 
-    // TUDO CERTO
+
+    /* ---------------------------
+        4. UPDATE DISCO_INFO
+    ---------------------------- */
+
+    $sqlDisco = $conn->prepare("
+        UPDATE disco_info
+        SET condicao_disco=?, versao=?, codigo_catalogo=?
+        WHERE produto_id=?
+    ");
+
+    $sqlDisco->bind_param(
+        "sssi",
+        $_POST['condicao_disco'],
+        $_POST['disco_versao'],
+        $_POST['codigo_catalogo'],
+        $produto_id
+    );
+
+    $sqlDisco->execute();
+
+
+    /* ---------------------------
+        5. UPDATE EDICAO_INFO
+    ---------------------------- */
+
+    $sqlEdicao = $conn->prepare("
+        UPDATE edicao_info
+        SET edicao_limitada=?, numero_edicao=?, versao=?, assinado=?
+        WHERE produto_id=?
+    ");
+
+    $sqlEdicao->bind_param(
+        "ssssi",
+        $_POST['edicao_limitada'],
+        $_POST['numero_edicao'],
+        $_POST['versao_edicao'],
+        $_POST['assinado'],
+        $produto_id
+    );
+
+    $sqlEdicao->execute();
+
+
+    /* ---------------------------
+        6. FINALIZA
+    ---------------------------- */
+
     $conn->commit();
 
-    header("Location: ../pages/home.php?success=editado");
-    exit();
+    header("Location: ../pages/home.php?edit=success");
+    exit;
 
 } catch (Exception $e) {
 
     $conn->rollback();
 
-    echo "<h2 style='color:red; padding:20px;'>Erro ao editar: " . $e->getMessage() . "</h2>";
+    die("Erro ao salvar edição: " . $e->getMessage());
 }

@@ -1,9 +1,13 @@
 <?php
 $DISCOGS_TOKEN = "kZXiXudVfKXheEYLlnDQeMRdWWBZIluRwJjABFsY";
 
-$releaseId = $_GET['id'] ?? null;
-if (!$releaseId) die("<p class='text-danger'>ID não informado.</p>");
+$id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+if (!$id) {
+    echo "<p>Erro: ID inválido.</p>";
+    exit;
+}
 
+$url = "https://api.discogs.com/releases/$id";
 $headers = [
     "User-Agent: MeuAppVinil/1.0",
     "Authorization: Discogs token=$DISCOGS_TOKEN"
@@ -19,74 +23,96 @@ function httpGET($u, $h) {
     return $r;
 }
 
-// Release completo
-$releaseUrl = "https://api.discogs.com/releases/$releaseId";
-$release = json_decode(httpGET($releaseUrl, $headers), true);
+$json = httpGET($url, $headers);
+$data = json_decode($json, true);
 
-$title   = $release["title"] ?? "Sem título";
-$artists = isset($release["artists"]) ? implode(", ", array_column($release["artists"], "name")) : "Artista não informado";
-$year    = $release["year"] ?? "—";
-$cover   = $release["images"][0]["uri"] ?? "";
+if (!$data) {
+    echo "<p>Erro ao carregar detalhes.</p>";
+    exit;
+}
 
-// Marketplace
-$marketUrl = "https://api.discogs.com/marketplace/search?release_id=$releaseId&per_page=10";
-$market = json_decode(httpGET($marketUrl, $headers), true);
-$prices = $market["listings"] ?? [];
+$title = $data['title'] ?? 'Sem título';
+$year = $data['year'] ?? '—';
+$country = $data['country'] ?? '—';
+$genres = isset($data['genres']) ? implode(', ', $data['genres']) : '—';
+$styles = isset($data['styles']) ? implode(', ', $data['styles']) : '—';
+$labels = isset($data['labels']) ? array_map(fn($l)=>$l['name']." (".$l['catno'].")", $data['labels']) : [];
+$tracklist = $data['tracklist'] ?? [];
+$images = $data['images'] ?? [];
+$extraArtists = $data['extraartists'] ?? [];
 ?>
 
-<style>
-.modal-album-cover {
-    width: 100%;
-    border-radius: 8px;
-}
-.track-item {
-    padding: 6px 0;
-    border-bottom: 1px solid #ddd;
-}
-.price-box {
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    margin-bottom: 10px;
-    background: #fafafa;
-}
-</style>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <div class="container-fluid">
 
-    <div class="row">
-        <div class="col-md-5">
-            <img src="<?= $cover ?>" class="modal-album-cover shadow-sm mb-3">
-        </div>
+    <!-- Título e informações principais -->
+    <h2 class="fw-bold text-center mb-3"><?= htmlspecialchars($title) ?></h2>
 
-        <div class="col-md-7">
-            <h3 class="fw-bold"><?= $artists ?></h3>
-            <h5 class="text-muted"><?= $title ?> (<?= $year ?>)</h5>
+    <div class="row g-4">
 
-            <hr>
-
-            <h5 class="fw-semibold">Faixas</h5>
-            <ul class="list-group mb-3">
-                <?php foreach ($release["tracklist"] as $t): ?>
-                    <li class="list-group-item">
-                        <b><?= $t["position"] ?></b> — <?= $t["title"] ?>
-                    </li>
-                <?php endforeach; ?>
-            </ul>
-
-            <h5 class="fw-semibold">Preços no Marketplace</h5>
-
-            <?php if ($prices): ?>
-                <?php foreach ($prices as $p): ?>
-                    <div class="price-box">
-                        <b><?= $p["price"]["value"] ?> <?= $p["price"]["currency"] ?></b><br>
-                        Condição: <?= $p["condition"] ?><br>
-                        Vendedor: <?= $p["seller"]["username"] ?>
+        <!-- Coluna ESQUERDA: Carrossel de Imagens -->
+        <div class="col-md-6">
+            <?php if ($images): ?>
+                <div id="carouselCapas" class="carousel slide" data-bs-interval="false">
+                    <div class="carousel-inner">
+                        <?php foreach ($images as $index => $img): ?>
+                            <div class="carousel-item <?= $index === 0 ? 'active' : '' ?>">
+                                <img src="<?= $img['uri'] ?>" class="d-block w-100 rounded shadow-sm" />
+                            </div>
+                        <?php endforeach; ?>
                     </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <p class="text-muted">Nenhum preço encontrado.</p>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselCapas" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon"></span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#carouselCapas" data-bs-slide="next">
+                        <span class="carousel-control-next-icon"></span>
+                    </button>
+                </div>
             <?php endif; ?>
         </div>
+
+        <!-- Coluna DIREITA: Informações -->
+        <div class="col-md-6">
+            <div class="p-3 border rounded bg-light">
+                <p><strong>Ano:</strong> <?= $year ?></p>
+                <p><strong>País:</strong> <?= htmlspecialchars($country) ?></p>
+                <p><strong>Gêneros:</strong> <?= htmlspecialchars($genres) ?></p>
+                <p><strong>Estilos:</strong> <?= htmlspecialchars($styles) ?></p>
+                <p><strong>Gravadoras:</strong> <?= htmlspecialchars(implode(', ', $labels)) ?></p>
+            </div>
+        </div>
     </div>
+
+    <!-- Tracklist com slider horizontal -->
+    <?php if ($tracklist): ?>
+        <h4 class="mt-4">Tracklist</h4>
+        <div class="d-flex overflow-auto gap-3 p-2" style="white-space: nowrap; max-width: 100%;">
+            <?php foreach ($tracklist as $t): ?>
+                <div class="border rounded p-3 shadow-sm track-item" style="min-width: 220px; display:inline-block;">
+                    <strong><?= htmlspecialchars($t['position'] ?? '') ?></strong><br>
+                    <?= htmlspecialchars($t['title'] ?? '') ?><br>
+                    <?php if (!empty($t['duration'])): ?>
+                        <span class="text-muted">(<?= $t['duration'] ?>)</span>
+                    <?php endif; ?>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
+
+    <!-- Créditos -->
+    <?php if ($extraArtists): ?>
+        <h4 class="mt-4">Créditos</h4>
+        <ul class="list-group">
+            <?php foreach ($extraArtists as $a): ?>
+                <li class="list-group-item">
+                    <strong><?= htmlspecialchars($a['name']) ?></strong> —
+                    <?= htmlspecialchars($a['role']) ?>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    <?php endif; ?>
+
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

@@ -1,6 +1,8 @@
 <?php
 $DISCOGS_TOKEN = "kZXiXudVfKXheEYLlnDQeMRdWWBZIluRwJjABFsY";
 
+include '../components/KeyBoardESC.php';
+
 // Query inicial
 $q = isset($_GET['q']) ? urlencode($_GET['q']) : "rock";
 
@@ -39,11 +41,54 @@ $results = $data["results"] ?? [];
 
 <style>
 .card:hover { transform: scale(1.05); transition:.2s; cursor:pointer; }
+
+/* Modal corrigido */
+.modal-bg {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(3px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+.modal-box {
+    width: 650px;
+    background: #fff;
+    border-radius: 12px;
+    animation: fadeIn 0.3s ease;
+    position: relative;
+    padding: 0;
+}
+.modal-content-scroll {
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+/* Botões do carrossel SEMPRE clicáveis */
+.carousel-control-prev,
+.carousel-control-next {
+    z-index: 9999 !important;
+    pointer-events: auto !important;
+}
+
+.close {
+    cursor: pointer;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute;
+    right: 15px;
+    top: 10px;
+    z-index: 9999;
+}
 </style>
 </head>
 
 <body class="bg-light">
-    <a href="home.php" class="btn btn-danger position-fixed top-0 start-0 m-3">
+<a href="home.php" id= "btnSair" class="btn btn-danger position-fixed top-0 start-0 m-3">
         <i class="bi bi-arrow-left"></i> Voltar
     </a>
 
@@ -60,7 +105,7 @@ $results = $data["results"] ?? [];
             </div>
         </form>
 
-        <!-- Área onde ficam os cards -->
+        <!-- Cards -->
         <div class="row g-4" id="cards-container">
             <?php foreach ($results as $item): ?>
             <div class="col-sm-6 col-md-4 col-lg-3">
@@ -85,7 +130,7 @@ $results = $data["results"] ?? [];
             <?php endforeach; ?>
         </div>
 
-        <!-- Botão carregar mais -->
+        <!-- Load more -->
         <div class="text-center my-4">
             <button id="loadMoreBtn" 
                 class="btn btn-dark btn-lg" 
@@ -98,41 +143,16 @@ $results = $data["results"] ?? [];
     </div>
 
 
-<!-- MODAL -->
-<div id="modalBg" class="modal-bg" style="display:none;">
+<!-- Modal -->
+<div id="modalBg" class="modal-bg">
     <div class="modal-box">
         <span id="closeModal" class="close">&times;</span>
-        <div id="modalContent">Carregando...</div>
+        <div class="modal-content-scroll" id="modalContent">Carregando...</div>
     </div>
 </div>
 
-<style>
-.modal-bg {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(3px);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-.modal-box {
-    width: 600px;
-    max-height: 80vh;
-    overflow-y: auto;
-    background: #fff;
-    padding: 20px;
-    border-radius: 12px;
-    animation: fadeIn 0.3s ease;
-}
-.close {
-    float: right;
-    cursor: pointer;
-    font-size: 24px;
-}
-</style>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
 // ----- MODAL -----
@@ -144,6 +164,13 @@ function abrirDetalhes(id) {
         .then(r => r.text())
         .then(html => {
             document.getElementById("modalContent").innerHTML = html;
+
+            // Inicializa carrossel após inserir HTML
+            document.querySelectorAll('.carousel').forEach(c => {
+                new bootstrap.Carousel(c, {
+                    interval: false
+                });
+            });
         });
 }
 

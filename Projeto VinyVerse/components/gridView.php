@@ -14,6 +14,7 @@ SELECT
     p.observacoes, 
     p.formato, 
     p.continente,
+    p.ano_lancamento,
 
     d.condicao_disco, 
     d.versao, 
@@ -65,9 +66,17 @@ $result = $stmt->get_result();
                      data-bs-toggle="modal"
                      data-bs-target="#modalDetalhes">
 
-                    <img src="../assets/uploads/<?= $row['imagem_capa'] ?>" 
-                         class="card-img-top" 
-                         alt="Capa">
+                    <?php
+                    $imgPath = !empty($row['imagem_capa'])
+                        ? "../assets/uploads/" . $row['imagem_capa']
+                        : "../assets/img/default_cover.png";
+                    ?>
+
+                    <img src="<?= $imgPath ?>" 
+                        class="card-img-top" 
+                        alt="Capa" 
+                        style="object-fit: cover; height: 220px;">
+
 
                     <div class="card-body text-center">
                         <h6 class="mb-1 fw-bold"><?= htmlspecialchars($row['titulo_album']) ?></h6>
@@ -83,6 +92,10 @@ $result = $stmt->get_result();
         <?php endwhile; ?>
 
     </div>
+
+     <div id="msgVazio" class="alert alert-warning text-center mt-4" style="display:none;">
+            Nenhum item encontrado. Adicione um novo produto!
+        </div>
 </div>
 
 <!-- Modal Detalhes -->
@@ -132,7 +145,12 @@ function abrirDetalhes(id) {
     produtoAtual = id;
     const data = window["produto_" + id];
 
-    document.getElementById("modal_img").src = "../assets/uploads/" + data.imagem_capa;
+    // Fallback para imagem ausente
+    const modalImg = data.imagem_capa && data.imagem_capa.trim() !== ""
+        ? `../assets/uploads/${data.imagem_capa}`
+        : `../assets/img/default_cover.png`;
+
+    document.getElementById("modal_img").src = modalImg;
 
     const badge = (valor) => {
         if (!valor) return `<span class="badge bg-secondary">N/A</span>`;
@@ -142,12 +160,13 @@ function abrirDetalhes(id) {
     };
 
     document.getElementById("modal_info").innerHTML = `
-
         <h5 class="section-title">Informações do Álbum</h5>
         <p><b>Título:</b> ${data.titulo_album}</p>
         <p><b>Artista:</b> ${data.artista_banda}</p>
         <p><b>Origem:</b> ${data.continente || "N/A"}</p>
         <p><b>Formato:</b> ${data.formato}</p>
+        <p><b>Ano:</b> ${data.ano_lancamento || "N/A"}</p>
+
 
         <hr>
 
@@ -177,6 +196,7 @@ function abrirDetalhes(id) {
         <p>${data.observacoes || "<i>Sem observações</i>"}</p>
     `;
 }
+
 
 
 
@@ -222,6 +242,7 @@ function aplicarFiltros() {
     const formatoSelecionado = selectFiltro?.value || "";
 
     const cards = document.querySelectorAll(".grid-card");
+    let totalVisiveis = 0;
 
     cards.forEach(card => {
         const titulo = card.dataset.titulo;
@@ -235,12 +256,26 @@ function aplicarFiltros() {
         const matchFormato =
             formatoSelecionado === "" || formato === formatoSelecionado;
 
-        card.parentElement.style.display = (matchPesquisa && matchFormato)
-            ? "block"
-            : "none";
+        const visivel = (matchPesquisa && matchFormato);
+
+        card.parentElement.style.display = visivel ? "block" : "none";
+
+        if (visivel) totalVisiveis++;
     });
+
+    // --------- mostrar/esconder mensagem ----------
+    const msg = document.getElementById("msgVazio");
+    if (totalVisiveis === 0) {
+        msg.style.display = "block";
+    } else {
+        msg.style.display = "none";
+    }
 }
+
 
 if (inputPesquisa) inputPesquisa.addEventListener("input", aplicarFiltros);
 if (selectFiltro) selectFiltro.addEventListener("change", aplicarFiltros);
+
+aplicarFiltros();
+
 </script>

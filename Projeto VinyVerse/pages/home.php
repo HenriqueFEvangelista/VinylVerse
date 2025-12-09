@@ -7,6 +7,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VinilVerse - Home</title>
 
+  <style>
+    body {
+        padding-top: 72px;
+    }
+  </style>
+
+
   <link rel="stylesheet" href="../assets/css/gridView.css">
 
   <!-- Bootstrap -->

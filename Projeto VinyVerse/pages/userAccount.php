@@ -1,6 +1,7 @@
 <?php 
 include '../components/auth.php';
 include '../config/db.php';
+include '../components/KeyBoardESC.php';
 
 // Buscar dados do usuário logado
 $user_id = $_SESSION['user_id'];
@@ -11,6 +12,24 @@ $stmt->execute();
 $stmt->bind_result($username, $email, $created);
 $stmt->fetch();
 $stmt->close();
+
+// CONTAGENS DA COLEÇÃO
+$sqlContagem = "
+SELECT 
+    COUNT(*) AS total_geral,
+    SUM(CASE WHEN formato = 'CD' THEN 1 ELSE 0 END) AS total_cd,
+    SUM(CASE WHEN formato = 'LP' THEN 1 ELSE 0 END) AS total_lp,
+    SUM(CASE WHEN formato = 'Set Box CD' THEN 1 ELSE 0 END) AS total_box_cd,
+    SUM(CASE WHEN formato = 'Set Box LP' THEN 1 ELSE 0 END) AS total_box_lp
+FROM produtos
+WHERE usuario_id = ?
+";
+
+$stmt2 = $conn->prepare($sqlContagem);
+$stmt2->bind_param("i", $user_id);
+$stmt2->execute();
+$contagens = $stmt2->get_result()->fetch_assoc();
+$stmt2->close();
 
 // Caminho da foto
 $profilePath = "../assets/uploads/profiles/user_$user_id.jpg";
@@ -34,19 +53,18 @@ $profileImg = file_exists($profilePath) ? $profilePath : "../assets/img/default_
 
     <!-- HEADER -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold"><i class="bi bi-person-circle me-2"></i> Minha Conta</h2>
+        <h2 class="fw-bold"><i class="bi bi-person-circle me-2"></i> Minha Conta</h2>
 
-    <div class="d-flex gap-2">
-        <button id="themeToggle" class="btn btn-outline-dark">
-            <i class="bi bi-moon-fill"></i>
-        </button>
+        <div class="d-flex gap-2">
+            <button id="themeToggle" class="btn btn-outline-dark">
+                <i class="bi bi-moon-fill"></i>
+            </button>
 
-        <a href="../pages/home.php" class="btn btn-secondary">
-            <i class="bi bi-arrow-left"></i> Voltar
-        </a>
+            <a href="../pages/home.php" id="btnSair" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+        </div>
     </div>
-</div>
-
 
     <!-- CARD PRINCIPAL -->
     <div class="card shadow-sm p-4">
@@ -79,6 +97,11 @@ $profileImg = file_exists($profilePath) ? $profilePath : "../assets/img/default_
 
         <hr>
 
+        <!--GRAFICO COLEÇÃO -->
+        <?php include '../components/grafico.php'; ?>
+
+        <hr>
+
         <!-- SENHA -->
         <div class="mb-3">
             <h5 class="fw-bold">Segurança</h5>
@@ -92,7 +115,8 @@ $profileImg = file_exists($profilePath) ? $profilePath : "../assets/img/default_
 
 </div>
 
-<!-- MODAL EDITAR FOTO -->
+<!-- ===== MODAIS ===== -->
+<!-- EDITAR FOTO -->
 <div class="modal fade" id="editPhotoModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -106,7 +130,6 @@ $profileImg = file_exists($profilePath) ? $profilePath : "../assets/img/default_
 
                 <div class="modal-body">
 
-                    <!-- Preview da imagem -->
                     <div class="text-center mb-3">
                         <img id="previewImage" 
                              src="<?= $profileImg ?>" 
@@ -115,7 +138,6 @@ $profileImg = file_exists($profilePath) ? $profilePath : "../assets/img/default_
                              style="object-fit: cover">
                     </div>
 
-                    <!-- Input do arquivo -->
                     <input 
                         type="file" 
                         name="profile_image" 
@@ -138,8 +160,7 @@ $profileImg = file_exists($profilePath) ? $profilePath : "../assets/img/default_
     </div>
 </div>
 
-
-<!-- MODAL EDITAR INFOS -->
+<!-- EDITAR INFORMAÇÕES -->
 <div class="modal fade" id="editInfoModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -183,7 +204,7 @@ $profileImg = file_exists($profilePath) ? $profilePath : "../assets/img/default_
     </div>
 </div>
 
-<!-- MODAL ALTERAR SENHA -->
+<!-- ALTERAR SENHA -->
 <div class="modal fade" id="editPasswordModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -215,7 +236,6 @@ $profileImg = file_exists($profilePath) ? $profilePath : "../assets/img/default_
     </div>
 </div>
 
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
@@ -228,16 +248,13 @@ document.getElementById("inputPhoto").addEventListener("change", function(event)
     }
 });
 
-
+// Tema
 const toggleBtn = document.getElementById("themeToggle");
 const html = document.body;
-
-// Carregar tema salvo
 const savedTheme = localStorage.getItem("theme") || "light";
 html.setAttribute("data-bs-theme", savedTheme);
 updateIcon(savedTheme);
 
-// Alternar tema
 toggleBtn.addEventListener("click", () => {
     const current = html.getAttribute("data-bs-theme");
     const next = current === "light" ? "dark" : "light";
@@ -247,7 +264,6 @@ toggleBtn.addEventListener("click", () => {
     updateIcon(next);
 });
 
-// Trocar ícone conforme o tema
 function updateIcon(theme) {
     if (theme === "dark") {
         toggleBtn.innerHTML = `<i class="bi bi-sun-fill"></i>`;
@@ -257,7 +273,6 @@ function updateIcon(theme) {
         toggleBtn.classList.replace("btn-outline-light", "btn-outline-dark");
     }
 }
-
 </script>
 
 </body>

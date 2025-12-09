@@ -86,7 +86,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         // ======== DADOS DA EDIÇÃO ========
         $limitada       = $_POST['limitada'] ?? 'Não';
         $numero_edicao  = $_POST['numero_edicao'] ?? '';
-        $prensagem      = $_POST['prensagem'] ?? 'Reedição';
+        $prensagem      = $_POST['versao'] ?? 'Reedição';
         $assinado       = $_POST['assinado'] ?? 'Não';
 
         $sql_edicao = "INSERT INTO edicao_info (produto_id, edicao_limitada, numero_edicao, prensagem, assinado)

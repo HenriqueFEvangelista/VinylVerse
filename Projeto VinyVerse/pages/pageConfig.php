@@ -43,50 +43,55 @@
         <!-- LISTA DE ATALHOS -->
         <ul class="list-group">
 
-    <li class="list-group-item d-flex justify-content-between align-items-center">
-        <div>
-            <span>✨ Abrir / Fechar Menu</span><br>
-            <small class="text-muted">Atalho atual: <strong class="shortcutText" data-key="openMenu"></strong></small>
-        </div>
-        <button class="btn btn-outline-primary editShortcut" data-key="openMenu">Editar</button>
-    </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <span>✨ Abrir / Fechar Menu</span><br>
+                    <small class="text-muted">Atalho atual:
+                        <strong class="shortcutText" data-key="toggleSidebar"></strong>
+                    </small>
+                </div>
+                <button class="btn btn-outline-primary editShortcut" data-key="toggleSidebar">Editar</button>
+            </li>
 
-    <li class="list-group-item d-flex justify-content-between align-items-center">
-        <div>
-            <span>🔎 Focar Pesquisa</span><br>
-            <small class="text-muted">Atalho atual: <strong class="shortcutText" data-key="focusSearch"></strong></small>
-        </div>
-        <button class="btn btn-outline-primary editShortcut" data-key="focusSearch">Editar</button>
-    </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <span>🔎 Focar Pesquisa</span><br>
+                    <small class="text-muted">Atalho atual:
+                        <strong class="shortcutText" data-key="focusSearch"></strong>
+                    </small>
+                </div>
+                <button class="btn btn-outline-primary editShortcut" data-key="focusSearch">Editar</button>
+            </li>
 
-    <li class="list-group-item d-flex justify-content-between align-items-center">
-        <div>
-            <span>➕ Adicionar Item</span><br>
-            <small class="text-muted">Atalho atual: <strong class="shortcutText" data-key="addItem"></strong></small>
-        </div>
-        <button class="btn btn-outline-primary editShortcut" data-key="addItem">Editar</button>
-    </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <span>➕ Adicionar Item</span><br>
+                    <small class="text-muted">Atalho atual:
+                        <strong class="shortcutText" data-key="addItem"></strong>
+                    </small>
+                </div>
+                <button class="btn btn-outline-primary editShortcut" data-key="addItem">Editar</button>
+            </li>
 
-    <li class="list-group-item d-flex justify-content-between align-items-center">
-        <div>
-            <span>🌙 Alternar Modo Escuro</span><br>
-            <small class="text-muted">Atalho atual: <strong class="shortcutText" data-key="toggleTheme"></strong></small>
-        </div>
-        <button class="btn btn-outline-primary editShortcut" data-key="toggleTheme">Editar</button>
-    </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <span>🌙 Alternar Modo Escuro</span><br>
+                    <small class="text-muted">Atalho atual:
+                        <strong class="shortcutText" data-key="toggleTheme"></strong>
+                    </small>
+                </div>
+                <button class="btn btn-outline-primary editShortcut" data-key="toggleTheme">Editar</button>
+            </li>
 
-</ul>
-
+        </ul>
 
         <button class="btn btn-danger w-100 mt-3" id="resetShortcuts">
             <i class="bi bi-arrow-counterclockwise me-1"></i> Restaurar Atalhos Padrão
         </button>
 
-
     </div>
 
 </div>
-
 
 <!-- MODAL PARA EDITAR ATALHO -->
 <div class="modal fade" id="editShortcutModal" tabindex="-1">
@@ -109,7 +114,6 @@
     </div>
 </div>
 
-
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -117,21 +121,20 @@
 <script>
 const body = document.body;
 const icon = document.getElementById("themeIcon");
-const saved = localStorage.getItem("theme") || "light";
+const savedTheme = localStorage.getItem("theme") || "light";
 
-body.setAttribute("data-bs-theme", saved);
-icon.className = saved === "dark" ? "bi bi-sun-fill" : "bi bi-moon-fill";
+body.setAttribute("data-bs-theme", savedTheme);
+icon.className = savedTheme === "dark" ? "bi bi-sun-fill" : "bi bi-moon-fill";
 
 document.getElementById("themeToggle").addEventListener("click", () => {
-    const now = body.getAttribute("data-bs-theme") === "dark" ? "light" : "dark";
-    body.setAttribute("data-bs-theme", now);
-    localStorage.setItem("theme", now);
-    icon.className = now === "dark" ? "bi bi-sun-fill" : "bi bi-moon-fill";
+    const newTheme = body.getAttribute("data-bs-theme") === "dark" ? "light" : "dark";
+    body.setAttribute("data-bs-theme", newTheme);
+    localStorage.setItem("theme", newTheme);
+    icon.className = newTheme === "dark" ? "bi bi-sun-fill" : "bi bi-moon-fill";
 });
 </script>
 
-
-<!-- Script para edição de atalhos -->
+<!-- SCRIPT DE ATALHOS -->
 <script>
 // Atalhos padrão
 const defaultShortcuts = {
@@ -146,16 +149,23 @@ let shortcuts = JSON.parse(localStorage.getItem("vinylverseShortcuts")) || defau
 let currentKey = null;
 let modal = new bootstrap.Modal(document.getElementById("editShortcutModal"));
 
-// Abrir modal
+// Preencher visualmente os atalhos na tela
+document.querySelectorAll(".shortcutText").forEach(el => {
+    const key = el.dataset.key;
+    el.textContent = shortcuts[key] ? shortcuts[key].toUpperCase() : "—";
+});
+
+// Abrir modal de edição
 document.querySelectorAll(".editShortcut").forEach(btn => {
     btn.addEventListener("click", () => {
         currentKey = btn.dataset.key;
-        document.getElementById("shortcutPreview").textContent = shortcuts[currentKey];
+        document.getElementById("shortcutPreview").textContent =
+            shortcuts[currentKey] || "—";
         modal.show();
     });
 });
 
-// Capturar nova tecla
+// Captura do combo de teclas
 document.addEventListener("keydown", function(e) {
     if (!currentKey) return;
 
@@ -171,43 +181,22 @@ document.addEventListener("keydown", function(e) {
     shortcuts[currentKey] = combo;
     localStorage.setItem("vinylverseShortcuts", JSON.stringify(shortcuts));
 
+    document.querySelector(`strong[data-key="${currentKey}"]`).textContent = combo.toUpperCase();
     document.getElementById("shortcutPreview").textContent = combo;
 });
 
-// BOTÃO REDEFINIR ATALHOS
+// Resetar atalhos
 document.getElementById("resetShortcuts").addEventListener("click", () => {
-
-    // Restaurar padrões
     shortcuts = { ...defaultShortcuts };
     localStorage.setItem("vinylverseShortcuts", JSON.stringify(shortcuts));
 
-    // Atualizar a lista exibida
-    document.querySelectorAll(".editShortcut").forEach(btn => {
-        const key = btn.dataset.key;
-        const liText = btn.parentElement.querySelector("div strong");
-        if (liText) liText.textContent = shortcuts[key].toUpperCase();
+    document.querySelectorAll(".shortcutText").forEach(el => {
+        const key = el.dataset.key;
+        el.textContent = shortcuts[key].toUpperCase();
     });
 
-    // Feedback ao usuário
-    const toast = document.createElement("div");
-    toast.className = "toast align-items-center text-bg-success border-0 position-fixed bottom-0 end-0 m-3";
-    toast.role = "alert";
-    toast.innerHTML = `
-        <div class="d-flex">
-            <div class="toast-body">
-                Atalhos restaurados para o padrão!
-            </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-        </div>
-    `;
-    document.body.appendChild(toast);
-    new bootstrap.Toast(toast).show();
-
-    setTimeout(() => toast.remove(), 4000);
+    alert("Atalhos restaurados para o padrão!");
 });
-
-
-
 </script>
 
 </body>

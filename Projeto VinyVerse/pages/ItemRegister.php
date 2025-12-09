@@ -11,7 +11,7 @@
 
 <body class="bg-light">
 
-  <button type="button" class="btn btn-danger position-fixed top-0 start-0 m-3 shadow-sm" onclick="window.history.back()">
+  <button type="button" id="btnSair" class="btn btn-danger position-fixed top-0 start-0 m-3 shadow-sm" onclick="window.history.back()">
     <i class="bi bi-arrow-left"></i> Voltar
   </button>
 
@@ -34,7 +34,7 @@
           </div>
           <div class="col-md-4">
             <label class="form-label">Ano de Lançamento</label>
-            <input type="number" class="form-control" name="ano" min="1900" max="2100" required>
+            <input type="number" class="form-control" name="ano" min="1000" required>
           </div>
           <div class="col-md-8">
             <label class="form-label">Gênero Musical</label>
@@ -63,19 +63,28 @@
           </div>
 
           <div class="col-md-6">
-            <label class="form-label fw-bold">Continente de origem</label>
-            <select class="form-select" id="continente" name="continente">
-              <option selected disabled>Selecione a origem...</option>
-              <option value="nacional">Nacional (Não Importado)</option>
-              <option value="africa">África</option>
-              <option value="america_sul">América do Sul</option>
-              <option value="america_norte">América do Norte</option>
-              <option value="asia">Ásia</option>
-              <option value="europa">Europa</option>
-              <option value="oceania">Oceania</option>
-              <option value="antartida">Antártida</option>
-            </select>
-          </div>
+  <label class="form-label fw-bold">Continente de origem</label>
+  <select class="form-select" id="continente" name="continente">
+    <option selected disabled>Selecione a origem...</option>
+
+    <!-- CONTINENTES -->
+    <option value="nacional">Nacional (Não Importado)</option>
+    <option value="africa">África</option>
+    <option value="america_sul">América do Sul</option>
+    <option value="america_norte">América do Norte</option>
+    <option value="asia">Ásia</option>
+    <option value="europa">Europa</option>
+    <option value="oceania">Oceania</option>
+    <option value="antartida">Antártida</option>
+
+    <!-- PAÍSES -->
+    <option value="reino_unido">Reino Unido</option>
+    <option value="japao">Japão</option>
+    <option value="alemanha">Alemanha</option>
+    <option value="estados_unidos">Estados Unidos</option>
+  </select>
+</div>
+
 
           <div class="col-md-6">
             <label class="form-label fw-bold">Condição do Disco</label>
@@ -157,12 +166,13 @@
           </div>
           <div class="col-md-4">
             <label class="form-label">Versão</label>
-            <select class="form-select" name="prensagem">
+            <select class="form-select" name="versao">
               <option>Primeira Prensagem</option>
               <option>Reedição</option>
               <option>Delux</option>
               <option>Super delux</option>
             </select>
+
           </div>
           <div class="col-md-4">
             <label class="form-label">Assinado pela Banda/Artista?</label>
@@ -189,7 +199,7 @@
     </form>
   </div>
 
-  <!-- Modal -->
+  <!-- MODAL -->
   <div class="modal fade" id="confirmarCadastroModal" tabindex="-1" aria-labelledby="confirmarCadastroLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered">
       <div class="modal-content">
@@ -232,6 +242,8 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <?php include '../components/KeyBoardESC.php';?>
 
   <script>
     document.getElementById("abrirModalBtn").addEventListener("click", function () {

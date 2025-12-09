@@ -40,9 +40,15 @@ else{
 
 <div class="container vh-100 d-flex justify-content-center align-items-center">
     <div class="card shadow p-4" style="max-width: 400px; width: 100%;">
-        <div class="text-center mb-4">
-            <h2 class="fw-bold text-primary">VinylVerse</h2>
-            <p class="text-muted">Entre na sua conta</p>
+        <div class="text-center mb-3">
+            <img src="assets/img/Logo_Vinylverse.png" 
+                 alt="Logo"
+                 class="img-fluid"
+                 style="max-width: 120px; height: auto;">
+
+            <p class="text-muted mt-2" style="font-size: 0.95rem;">
+                Entre na sua conta
+            </p>
         </div>
 
         <?php if ($error): ?>
