@@ -31,9 +31,17 @@ $stmt2->execute();
 $contagens = $stmt2->get_result()->fetch_assoc();
 $stmt2->close();
 
-// Caminho da foto
-$profilePath = "../assets/uploads/profiles/user_$user_id.jpg";
-$profileImg = file_exists($profilePath) ? $profilePath : "../assets/img/default_profile.png";
+// SUPORTE A MÚLTIPLAS EXTENSÕES + CACHE BUSTER
+$basePath = "../assets/uploads/profiles/user_" . $user_id;
+$extensions = [".jpg", ".png", ".webp", ".gif"];
+$profileImg = "../assets/img/default_profile.png";
+
+foreach ($extensions as $ext) {
+    if (file_exists($basePath . $ext)) {
+        $profileImg = $basePath . $ext . "?v=" . time();
+        break;
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -50,6 +58,45 @@ $profileImg = file_exists($profilePath) ? $profilePath : "../assets/img/default_
 <body class="p-3" data-bs-theme="light">
 
 <div class="container mt-4" style="max-width: 750px;">
+
+    <!-- ALERTAS DE ERRO / SUCESSO -->
+    <?php if (isset($_GET['error'])): ?>
+        <?php
+            $msg = "";
+
+            switch ($_GET['error']) {
+                case "no_file":
+                    $msg = "Nenhum arquivo foi enviado.";
+                    break;
+                case "invalid_image":
+                    $msg = "O arquivo enviado não é uma imagem válida.";
+                    break;
+                case "invalid_type":
+                    $msg = "Tipo de arquivo não permitido. Utilize JPG, PNG, WEBP ou GIF.";
+                    break;
+                case "too_big":
+                    $msg = "A imagem é muito grande. Tamanho máximo permitido: 2MB.";
+                    break;
+                case "upload_fail":
+                    $msg = "Falha ao salvar a imagem. Tente novamente.";
+                    break;
+                default:
+                    $msg = "Erro desconhecido.";
+            }
+        ?>
+
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-x-circle"></i> <?= $msg ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
+
+    <?php if (isset($_GET['photo']) && $_GET['photo'] === "updated"): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle"></i> Foto atualizada com sucesso!
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
 
     <!-- HEADER -->
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -97,7 +144,7 @@ $profileImg = file_exists($profilePath) ? $profilePath : "../assets/img/default_
 
         <hr>
 
-        <!--GRAFICO COLEÇÃO -->
+        <!-- GRAFICO -->
         <?php include '../components/grafico.php'; ?>
 
         <hr>
@@ -115,7 +162,7 @@ $profileImg = file_exists($profilePath) ? $profilePath : "../assets/img/default_
 
 </div>
 
-<!-- ===== MODAIS ===== -->
+<!-- MODAIS -->
 <!-- EDITAR FOTO -->
 <div class="modal fade" id="editPhotoModal" tabindex="-1">
     <div class="modal-dialog">
@@ -273,6 +320,15 @@ function updateIcon(theme) {
         toggleBtn.classList.replace("btn-outline-light", "btn-outline-dark");
     }
 }
+
+// Remove alert automaticamente após 4 segundos
+    setTimeout(() => {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            let bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
+        });
+    }, 4000); // 4000ms = 4 segundos
 </script>
 
 </body>
