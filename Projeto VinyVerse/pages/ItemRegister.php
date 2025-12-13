@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-bs-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,11 +9,17 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 
-<body class="bg-light">
+<body>
 
   <button type="button" id="btnSair" class="btn btn-danger position-fixed top-0 start-0 m-3 shadow-sm" onclick="window.history.back()">
     <i class="bi bi-arrow-left"></i> Voltar
   </button>
+
+  <button type="button" id="toggleTheme" class="btn btn-secondary position-fixed top-0 end-0 m-3">
+    <i id="themeIcon" class="bi bi-moon-stars"></i>
+  </button>
+
+
 
   <div class="container my-5">
     <h2 class="text-center mb-4">Cadastro de Produto</h2>
@@ -57,10 +63,31 @@
             </select>
           </div>
 
-          <div class="col-md-6">
-            <label for="imagemCapa" class="form-label fw-bold">Imagem da Capa</label>
-            <input class="form-control" type="file" id="imagemCapa" name="imagemCapa" accept="image/*">
-          </div>
+         <div class="col-md-6">
+  <label for="imagemCapa" class="form-label fw-bold">Imagem da Capa</label>
+
+  <div class="d-flex align-items-center gap-2">
+
+    <!-- Botão Local -->
+    <button type="button" id="btnLocal" class="btn btn-outline-secondary icon-btn active">
+      <i class="bi bi-folder-fill"></i>
+    </button>
+
+    <!-- Botão URL -->
+    <button type="button" id="btnURL" class="btn btn-outline-secondary icon-btn">
+      <i class="bi bi-globe2"></i>
+    </button>
+
+    <!-- Input LOCAL -->
+    <input class="form-control" type="file" id="inputLocal" name="imagemCapa" accept="image/*">
+
+    <!-- Input URL -->
+    <input class="form-control d-none" type="url" id="inputURL" name="imagemURL"
+           placeholder="Cole o link da capa">
+    </div>
+  </div>
+
+
 
           <div class="col-md-6">
   <label class="form-label fw-bold">Continente de origem</label>
@@ -108,10 +135,6 @@
             </select>
           </div>
 
-          <div class="col-md-6">
-            <label class="form-label">Código de Catálogo</label>
-            <input type="text" class="form-control" name="codigo">
-          </div>
         </div>
       </div>
 
@@ -246,41 +269,108 @@
   <?php include '../components/KeyBoardESC.php';?>
 
   <script>
-    document.getElementById("abrirModalBtn").addEventListener("click", function () {
-      const form = document.getElementById("formCadastro");
-      const dados = new FormData(form);
+/* =============================
+      MODAL DE CONFIRMAÇÃO
+============================= */
+document.getElementById("abrirModalBtn").addEventListener("click", function () {
+  const form = document.getElementById("formCadastro");
+  const dados = new FormData(form);
 
-      let resumoHTML = "<ul class='list-group mb-3'>";
+  let resumoHTML = "<ul class='list-group mb-3'>";
 
-      dados.forEach((valor, chave) => {
-        if (chave !== "imagemCapa" && chave !== "observacoes") {
-          resumoHTML += `
-            <li class="list-group-item">
-              <strong>${chave}:</strong> ${valor || "<em>não informado</em>"}
-            </li>`;
-        }
-      });
+  dados.forEach((valor, chave) => {
+    if (chave !== "imagemCapa" && chave !== "imagemURL" && chave !== "observacoes") {
+      resumoHTML += `
+        <li class="list-group-item">
+          <strong>${chave}:</strong> ${valor || "<em>não informado</em>"}
+        </li>`;
+    }
+  });
 
-      resumoHTML += "</ul>";
-      document.getElementById("resumoCadastro").innerHTML = resumoHTML;
+  resumoHTML += "</ul>";
+  document.getElementById("resumoCadastro").innerHTML = resumoHTML;
 
-      const obs = dados.get("observacoes")?.trim();
-      document.getElementById("previewObservacoes").innerHTML =
-        obs ? obs : "<em>nenhuma observação</em>";
+  const obs = dados.get("observacoes")?.trim();
+  document.getElementById("previewObservacoes").innerHTML =
+    obs ? obs : "<em>nenhuma observação</em>";
 
-      const imagem = document.getElementById("imagemCapa").files[0];
-      const imgPreview = document.getElementById("previewImagem");
+  const fileInput = document.getElementById("inputLocal");
+  const urlInput = document.getElementById("inputURL");
+  const imgPreview = document.getElementById("previewImagem");
 
-      if (imagem) {
-        imgPreview.src = URL.createObjectURL(imagem);
-        imgPreview.style.display = "block";
-      } else {
-        imgPreview.style.display = "none";
-      }
+  // Se imagem vem de arquivo
+  if (fileInput.files.length > 0) {
+    imgPreview.src = URL.createObjectURL(fileInput.files[0]);
+    imgPreview.style.display = "block";
+  }
+  // Se imagem vem de URL digitada
+  else if (urlInput.value.trim() !== "") {
+    imgPreview.src = urlInput.value.trim();
+    imgPreview.style.display = "block";
+  }
+  else {
+    imgPreview.style.display = "none";
+  }
 
-      new bootstrap.Modal(document.getElementById("confirmarCadastroModal")).show();
-    });
-  </script>
+  new bootstrap.Modal(document.getElementById("confirmarCadastroModal")).show();
+});
+
+
+/* =============================
+          TEMA ESCURO
+============================= */
+const html = document.documentElement;
+const themeBtn = document.getElementById("toggleTheme");
+const themeIcon = document.getElementById("themeIcon");
+
+const savedTheme = localStorage.getItem("theme");
+if (savedTheme) {
+  html.setAttribute("data-bs-theme", savedTheme);
+  themeIcon.className = savedTheme === "dark" ? "bi bi-sun-fill" : "bi bi-moon-stars";
+}
+
+themeBtn.addEventListener("click", () => {
+  const current = html.getAttribute("data-bs-theme");
+  const newTheme = current === "light" ? "dark" : "light";
+
+  html.setAttribute("data-bs-theme", newTheme);
+  localStorage.setItem("theme", newTheme);
+
+  themeIcon.className = newTheme === "dark" ? "bi bi-sun-fill" : "bi bi-moon-stars";
+});
+
+
+/* =============================
+   BOTÕES: LOCAL x URL IMAGEM
+============================= */
+const btnLocal = document.getElementById("btnLocal");
+const btnURL = document.getElementById("btnURL");
+
+const inputLocal = document.getElementById("inputLocal");
+const inputURL = document.getElementById("inputURL");
+
+// MODO LOCAL
+btnLocal.addEventListener("click", () => {
+  btnLocal.classList.add("active");
+  btnURL.classList.remove("active");
+
+  inputLocal.classList.remove("d-none");
+  inputURL.classList.add("d-none");
+
+  inputURL.value = "";
+});
+
+// MODO URL
+btnURL.addEventListener("click", () => {
+  btnURL.classList.add("active");
+  btnLocal.classList.remove("active");
+
+  inputLocal.classList.add("d-none");
+  inputURL.classList.remove("d-none");
+
+  inputLocal.value = "";
+});
+</script>
 
 </body>
 </html>

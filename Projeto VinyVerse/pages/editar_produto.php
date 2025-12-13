@@ -41,7 +41,7 @@ if (!$item) {
 ?>
 
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-bs-theme="light">
 <head>
     <meta charset="UTF-8">
     <title>Editar Produto</title>
@@ -50,12 +50,16 @@ if (!$item) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 </head>
 
-<body class="bg-light">
+<body>
 
 <div class="container my-5">
 
     <button class="btn btn-danger mb-3" onclick="history.back()">
         <i class="bi bi-arrow-left"></i> Voltar
+    </button>
+
+    <button type="button" id="toggleTheme" class="btn btn-secondary position-fixed top-0 end-0 m-3">
+        <i id="themeIcon" class="bi bi-moon-stars"></i>
     </button>
 
     <h2 class="mb-4">Editar Produto</h2>
@@ -117,18 +121,51 @@ if (!$item) {
 
                 <!-- imagem -->
                 <div class="col-md-6">
-                    <label class="form-label fw-bold">Imagem da Capa</label>
+  <label class="form-label fw-bold">Imagem da Capa</label>
 
-                    <div class="d-flex align-items-center gap-3">
+  <div class="d-flex align-items-center gap-2 mb-2">
 
-                        <img src="../assets/uploads/<?= $item['imagem_capa'] ?>"
-                             width="70" height="70"
-                             class="rounded border"
-                             style="object-fit:cover">
+    <!-- Botão Local -->
+    <button type="button" id="btnLocal" class="btn btn-outline-secondary icon-btn active">
+      <i class="bi bi-folder-fill"></i>
+    </button>
 
-                        <input class="form-control" type="file" name="imagemCapa" accept="image/*">
-                    </div>
-                </div>
+    <!-- Botão URL -->
+    <button type="button" id="btnURL" class="btn btn-outline-secondary icon-btn">
+      <i class="bi bi-globe2"></i>
+    </button>
+
+    <!-- Preview -->
+    <img
+      id="previewImagem"
+      src="../assets/uploads/<?= htmlspecialchars($item['imagem_capa']) ?>"
+      width="70"
+      height="70"
+      class="rounded border"
+      style="object-fit:cover"
+      onerror="this.style.display='none'"
+    >
+  </div>
+
+  <!-- Input LOCAL -->
+  <input
+    class="form-control"
+    type="file"
+    id="inputLocal"
+    name="imagemCapa"
+    accept="image/*"
+  >
+
+  <!-- Input URL -->
+  <input
+    class="form-control d-none mt-2"
+    type="url"
+    id="inputURL"
+    name="imagemURL"
+    placeholder="Cole o link da capa (http ou https)"
+  >
+</div>
+
 
                 <!-- continente -->
                 <div class="col-md-6">
@@ -195,12 +232,6 @@ if (!$item) {
                            value="<?= $item['disco_versao'] ?>">
                 </div>
 
-                <!-- código catálogo -->
-                <div class="col-md-6">
-                    <label class="form-label">Código de Catálogo</label>
-                    <input type="text" class="form-control" name="codigo_catalogo" 
-                           value="<?= $item['codigo_catalogo'] ?>">
-                </div>
 
             </div>
         </div>
@@ -310,6 +341,78 @@ if (!$item) {
     </form>
 
 </div>
+
+
+<script>
+  const btnLocal = document.getElementById("btnLocal");
+  const btnURL = document.getElementById("btnURL");
+
+  const inputLocal = document.getElementById("inputLocal");
+  const inputURL = document.getElementById("inputURL");
+
+  const preview = document.getElementById("previewImagem");
+
+  // --- MODO LOCAL ---
+  btnLocal.addEventListener("click", () => {
+    btnLocal.classList.add("active");
+    btnURL.classList.remove("active");
+
+    inputLocal.classList.remove("d-none");
+    inputURL.classList.add("d-none");
+
+    inputURL.value = "";
+  });
+
+  // --- MODO URL ---
+  btnURL.addEventListener("click", () => {
+    btnURL.classList.add("active");
+    btnLocal.classList.remove("active");
+
+    inputURL.classList.remove("d-none");
+    inputLocal.classList.add("d-none");
+
+    inputLocal.value = "";
+  });
+
+  // --- PREVIEW ARQUIVO LOCAL ---
+  inputLocal.addEventListener("change", () => {
+    if (inputLocal.files && inputLocal.files[0]) {
+      preview.src = URL.createObjectURL(inputLocal.files[0]);
+      preview.style.display = "block";
+    }
+  });
+
+  // --- PREVIEW URL ---
+  inputURL.addEventListener("input", () => {
+    if (inputURL.value.trim()) {
+      preview.src = inputURL.value;
+      preview.style.display = "block";
+    }
+  });
+
+  /* =============================
+          TEMA ESCURO
+============================= */
+const html = document.documentElement;
+const themeBtn = document.getElementById("toggleTheme");
+const themeIcon = document.getElementById("themeIcon");
+
+const savedTheme = localStorage.getItem("theme");
+if (savedTheme) {
+  html.setAttribute("data-bs-theme", savedTheme);
+  themeIcon.className = savedTheme === "dark" ? "bi bi-sun-fill" : "bi bi-moon-stars";
+}
+
+themeBtn.addEventListener("click", () => {
+  const current = html.getAttribute("data-bs-theme");
+  const newTheme = current === "light" ? "dark" : "light";
+
+  html.setAttribute("data-bs-theme", newTheme);
+  localStorage.setItem("theme", newTheme);
+
+  themeIcon.className = newTheme === "dark" ? "bi bi-sun-fill" : "bi bi-moon-stars";
+});
+</script>
 
 </body>
 </html>

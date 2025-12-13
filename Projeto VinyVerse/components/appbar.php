@@ -16,22 +16,39 @@
 
     <div class="d-flex align-items-center ms-auto gap-3">
 
+      <!-- PESQUISA -->
       <form class="d-flex" role="search" style="max-width: 250px;">
         <input id="pesquisa" class="form-control" type="search" placeholder="Pesquisar...">
       </form>
 
+      <!-- ADICIONAR ITEM -->
       <a href="../pages/ItemRegister.php" class="btn btn-outline-light d-flex align-items-center gap-2" id="addItemBtn">
         <i class="bi bi-plus-circle"></i> Adicionar
       </a>
 
+      <!-- FILTRO DE ARTISTA/BANDA -->
+      <select id="filtroArtista" class="form-select w-auto">
+        <option value="">Artistas</option>
+
+        <?php if (isset($resultArtistas)): ?>
+          <?php while ($a = $resultArtistas->fetch_assoc()): ?>
+            <option value="<?= strtolower($a['artista_banda']) ?>">
+              <?= htmlspecialchars($a['artista_banda']) ?>
+            </option>
+          <?php endwhile; ?>
+        <?php endif; ?>
+      </select>
+
+      <!-- FILTRO DE FORMATO -->
       <select id="filtro" class="form-select w-auto">
-        <option value="">Filtrar por...</option>
+        <option value="">Formato</option>
         <option value="LP">LP</option>
         <option value="CD">CD</option>
         <option value="Set Box LP">Set Box LP</option>
         <option value="Set Box CD">Set Box CD</option>
       </select>
 
+      <!-- TEMA -->
       <button id="themeToggle" class="btn btn-outline-light">
         <i class="bi bi-moon-fill" id="themeIcon"></i>
       </button>
@@ -41,8 +58,9 @@
   </div>
 </nav>
 
-
+<!-- OFFCANVAS MENU -->
 <div class="offcanvas offcanvas-start custom-offcanvas" id="sidebarMenu" data-bs-theme="dark">
+
   <div class="offcanvas-header">
     <h4 class="offcanvas-title fw-bold textefont">VinilVerse</h4>
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>

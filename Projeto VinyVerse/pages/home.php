@@ -1,4 +1,22 @@
-<?php include '../components/auth.php'; ?>
+<?php
+include '../config/db.php';
+include '../components/auth.php';
+
+$usuario_id = $_SESSION['user_id'];
+
+// Buscar artistas únicos para o appbar
+$sqlArtistas = "
+    SELECT DISTINCT artista_banda 
+    FROM produtos 
+    WHERE usuario_id = ?
+    ORDER BY artista_banda ASC
+";
+
+$stmtArtistas = $conn->prepare($sqlArtistas);
+$stmtArtistas->bind_param("i", $usuario_id);
+$stmtArtistas->execute();
+$resultArtistas = $stmtArtistas->get_result();
+?>
 
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -8,9 +26,7 @@
   <title>VinilVerse - Home</title>
 
   <style>
-    body {
-        padding-top: 72px;
-    }
+    body {padding-top: 72px;}
   </style>
 
 
@@ -91,7 +107,6 @@
 </div>
 
 <?php include '../components/keyboardShortcuts.php'; ?>
-
 
 </body>
 </html>

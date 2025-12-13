@@ -6,6 +6,22 @@ include '../components/KeyBoardESC.php';
 // Buscar dados do usuário logado
 $user_id = $_SESSION['user_id'];
 
+$sql = "
+SELECT artista_banda, COUNT(*) AS total_discos
+FROM produtos
+WHERE usuario_id = ?
+GROUP BY artista_banda
+ORDER BY total_discos DESC
+";
+
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+
+
+
 $stmt = $conn->prepare("SELECT username, email, created_at FROM users WHERE id = ?");
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
@@ -146,6 +162,33 @@ foreach ($extensions as $ext) {
 
         <!-- GRAFICO -->
         <?php include '../components/grafico.php'; ?>
+        <hr>
+
+        <div class="card shadow-sm p-3 mt-4">
+    <h5 
+        class="fw-bold mb-3 d-flex align-items-center"
+        style="cursor:pointer"
+        onclick="toggleArtistas()"
+    >
+        <i class="bi bi-chevron-down me-2" id="iconeArtistas"></i>
+        Discos por Artista
+    </h5>
+
+    <div id="listaArtistas" style="display:none">
+        <ul class="list-group list-group-flush">
+            <?php while ($row = $result->fetch_assoc()): ?>
+                <li class="list-group-item bg-transparent text-light d-flex justify-content-between">
+                    <span><?= htmlspecialchars($row['artista_banda']) ?></span>
+                    <span class="badge bg-primary">
+                        <?= $row['total_discos'] ?>
+                    </span>
+                </li>
+            <?php endwhile; ?>
+        </ul>
+    </div>
+</div>
+
+
 
         <hr>
 
@@ -329,6 +372,18 @@ function updateIcon(theme) {
             bsAlert.close();
         });
     }, 4000); // 4000ms = 4 segundos
+
+   
+    function toggleArtistas() {
+    const lista = document.getElementById("listaArtistas");
+    const icone = document.getElementById("iconeArtistas");
+
+    const aberto = lista.style.display === "block";
+
+    lista.style.display = aberto ? "none" : "block";
+    icone.className = aberto ? "bi bi-chevron-down me-2" : "bi bi-chevron-up me-2";
+}
+
 </script>
 
 </body>

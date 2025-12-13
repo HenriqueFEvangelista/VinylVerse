@@ -26,18 +26,84 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $observacoes    = $_POST['observacoes'] ?? '';
 
         // ======== UPLOAD DE IMAGEM ========
-        $imagem_capa = null;
+        // ======== IMAGEM (UPLOAD LOCAL OU LINK) ========
+$imagem_capa = null;
 
-        if (!empty($_FILES['imagemCapa']['name'])) {
+/*  
+---------------------------------------------------
+  CASO 1: UPLOAD LOCAL NORMAL
+---------------------------------------------------
+*/
+if (!empty($_FILES['imagemCapa']['name'])) {
 
-            $extensao = pathinfo($_FILES['imagemCapa']['name'], PATHINFO_EXTENSION);
-            $nomeArquivo = uniqid('capa_') . '.' . $extensao;
+    $extensao = pathinfo($_FILES['imagemCapa']['name'], PATHINFO_EXTENSION);
+    $nomeArquivo = uniqid('capa_') . '.' . $extensao;
+    $destino = "../assets/uploads/" . $nomeArquivo;
+
+    if (move_uploaded_file($_FILES['imagemCapa']['tmp_name'], $destino)) {
+        $imagem_capa = $nomeArquivo;
+    }
+}
+
+
+/*  
+---------------------------------------------------
+  CASO 2: LINK DE IMAGEM (URL)
+  - Valida se é imagem
+  - Baixa e salva no servidor
+---------------------------------------------------
+*/
+elseif (!empty($_POST['imagemURL'])) {
+
+    $url = trim($_POST['imagemURL']);
+
+    /* ---------------------------------------------------
+       CASO 2A: IMAGEM BASE64 (data:image/png;base64,...)
+    --------------------------------------------------- */
+    if (preg_match('/^data:image\/(\w+);base64,/', $url, $matches)) {
+
+        $ext = $matches[1]; // pega o tipo de imagem (jpeg, png, etc)
+        $base64 = substr($url, strpos($url, ',') + 1);
+
+        $base64 = base64_decode($base64);
+
+        if ($base64 !== false) {
+            $nomeArquivo = uniqid("capa_") . "." . $ext;
             $destino = "../assets/uploads/" . $nomeArquivo;
 
-            if (move_uploaded_file($_FILES['imagemCapa']['tmp_name'], $destino)) {
+            file_put_contents($destino, $base64);
+            $imagem_capa = $nomeArquivo;
+        }
+
+    }
+
+    /* ---------------------------------------------------
+       CASO 2B: LINK HTTP NORMAL
+    --------------------------------------------------- */
+    elseif (filter_var($url, FILTER_VALIDATE_URL)) {
+        if ($headers && isset($headers['Content-Type']) && strpos($headers['Content-Type'], 'image/') === 0) {
+
+            // Descobre extensão do arquivo
+            $mime = $headers['Content-Type'];      // ex img/png
+            $ext = explode("/", $mime)[1] ?? 'jpg';
+
+            // Gera nome único para o arquivo local
+            $nomeArquivo = uniqid('capa_') . '.' . $ext;
+            $destino = "../assets/uploads/" . $nomeArquivo;
+
+            // Baixa arquivo
+            $conteudo = @file_get_contents($url);
+
+            if ($conteudo) {
+                file_put_contents($destino, $conteudo);
                 $imagem_capa = $nomeArquivo;
             }
         }
+    }
+}
+
+
+
 
         // ======== INSERE EM PRODUTOS ========
         $sql_produto = "INSERT INTO produtos 

@@ -236,10 +236,12 @@ function editarProduto() {
 
 const inputPesquisa = document.getElementById("pesquisa");
 const selectFiltro = document.getElementById("filtro");
+const selectArtista = document.getElementById("filtroArtista");
 
 function aplicarFiltros() {
     const termo = (inputPesquisa?.value || "").toLowerCase();
     const formatoSelecionado = selectFiltro?.value || "";
+    const artistaSelecionado = selectArtista?.value || "";
 
     const cards = document.querySelectorAll(".grid-card");
     let totalVisiveis = 0;
@@ -256,25 +258,24 @@ function aplicarFiltros() {
         const matchFormato =
             formatoSelecionado === "" || formato === formatoSelecionado;
 
-        const visivel = (matchPesquisa && matchFormato);
+        const matchArtista =
+            artistaSelecionado === "" || artista === artistaSelecionado;
+
+        const visivel = (matchPesquisa && matchFormato && matchArtista);
 
         card.parentElement.style.display = visivel ? "block" : "none";
 
         if (visivel) totalVisiveis++;
     });
 
-    // --------- mostrar/esconder mensagem ----------
+    // mensagem vazio
     const msg = document.getElementById("msgVazio");
-    if (totalVisiveis === 0) {
-        msg.style.display = "block";
-    } else {
-        msg.style.display = "none";
-    }
+    msg.style.display = totalVisiveis === 0 ? "block" : "none";
 }
-
 
 if (inputPesquisa) inputPesquisa.addEventListener("input", aplicarFiltros);
 if (selectFiltro) selectFiltro.addEventListener("change", aplicarFiltros);
+if (selectArtista) selectArtista.addEventListener("change", aplicarFiltros);
 
 aplicarFiltros();
 
