@@ -105,66 +105,64 @@ if (!$item) {
 
             <div class="card-body row g-3">
 
-                <!-- formato -->
+                <!-- Versao -->
                 <div class="col-md-6">
-                    <label class="form-label">Formato</label>
-                    <select class="form-select" name="formato">
-                        <?php
-                        $formatos = ["LP", "CD", "Set Box LP", "Set Box CD"];
-                        foreach ($formatos as $f) {
-                            $s = $item['formato'] == $f ? "selected" : "";
-                            echo "<option value='$f' $s>$f</option>";
-                        }
-                        ?>
+                    <label class="form-label">Versão</label>
+                    <select class="form-select" name="versao_edicao">
+                        <option <?= $item['edicao_versao']=='Primeira Prensagem'?'selected':'' ?>>Primeira Prensagem</option>
+                        <option <?= $item['edicao_versao']=='Reedição'?'selected':'' ?>>Reedição</option>
+                        <option <?= $item['edicao_versao']=='Delux'?'selected':'' ?>>Delux</option>
+                        <option <?= $item['edicao_versao']=='Super delux'?'selected':'' ?>>Super delux</option>
                     </select>
                 </div>
 
+
                 <!-- imagem -->
                 <div class="col-md-6">
-  <label class="form-label fw-bold">Imagem da Capa</label>
+                    <label class="form-label fw-bold">Imagem da Capa</label>
 
-  <div class="d-flex align-items-center gap-2 mb-2">
+                        <div class="d-flex align-items-center gap-2 mb-2">
 
-    <!-- Botão Local -->
-    <button type="button" id="btnLocal" class="btn btn-outline-secondary icon-btn active">
-      <i class="bi bi-folder-fill"></i>
-    </button>
+                        <!-- Botão Local -->
+                        <button type="button" id="btnLocal" class="btn btn-outline-secondary icon-btn active">
+                            <i class="bi bi-folder-fill"></i>
+                        </button>
 
-    <!-- Botão URL -->
-    <button type="button" id="btnURL" class="btn btn-outline-secondary icon-btn">
-      <i class="bi bi-globe2"></i>
-    </button>
+                        <!-- Botão URL -->
+                        <button type="button" id="btnURL" class="btn btn-outline-secondary icon-btn">
+                            <i class="bi bi-globe2"></i>
+                        </button>
 
-    <!-- Preview -->
-    <img
-      id="previewImagem"
-      src="../assets/uploads/<?= htmlspecialchars($item['imagem_capa']) ?>"
-      width="70"
-      height="70"
-      class="rounded border"
-      style="object-fit:cover"
-      onerror="this.style.display='none'"
-    >
-  </div>
+                        <!-- Preview -->
+                    <img
+                        id="previewImagem"
+                        src="../assets/uploads/<?= htmlspecialchars($item['imagem_capa']) ?>"
+                        width="70"
+                        height="70"
+                        class="rounded border"
+                        style="object-fit:cover"
+                        onerror="this.style.display='none'"
+                    >
+                </div>
 
-  <!-- Input LOCAL -->
-  <input
-    class="form-control"
-    type="file"
-    id="inputLocal"
-    name="imagemCapa"
-    accept="image/*"
-  >
+                <!-- Input LOCAL -->
+                <input
+                    class="form-control"
+                    type="file"
+                    id="inputLocal"
+                    name="imagemCapa"
+                    accept="image/*"
+                > 
 
-  <!-- Input URL -->
-  <input
-    class="form-control d-none mt-2"
-    type="url"
-    id="inputURL"
-    name="imagemURL"
-    placeholder="Cole o link da capa (http ou https)"
-  >
-</div>
+                <!-- Input URL -->
+                <input
+                    class="form-control d-none mt-2"
+                    type="url"
+                    id="inputURL"
+                    name="imagemURL"
+                    placeholder="Cole o link da capa (http ou https)"
+                >
+            </div>
 
 
                 <!-- continente -->
@@ -193,6 +191,23 @@ if (!$item) {
                         ?>
                     </select>
                 </div>
+
+
+
+                <!-- formato -->
+                <div class="col-md-6">
+                    <label class="form-label">Formato</label>
+                    <select class="form-select" name="formato">
+                        <?php
+                        $formatos = ["LP", "CD", "Set Box LP", "Set Box CD"];
+                        foreach ($formatos as $f) {
+                            $s = $item['formato'] == $f ? "selected" : "";
+                            echo "<option value='$f' $s>$f</option>";
+                        }
+                        ?>
+                    </select>
+                </div>
+
 
                 <!-- condição disco -->
                 <div class="col-md-6">
@@ -224,14 +239,6 @@ if (!$item) {
                         <option value="Aberto" <?= $item['tipo_embalagem']=='Aberto'?'selected':'' ?>>Aberto</option>
                     </select>
                 </div>
-
-                <!-- versão disco -->
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">Versão (Disco)</label>
-                    <input type="text" class="form-control" name="disco_versao" 
-                           value="<?= $item['disco_versao'] ?>">
-                </div>
-
 
             </div>
         </div>
@@ -300,16 +307,6 @@ if (!$item) {
                     <label class="form-label">Número da Edição</label>
                     <input type="text" class="form-control" name="numero_edicao" 
                            value="<?= $item['numero_edicao'] ?>">
-                </div>
-
-                <div class="col-md-4">
-                    <label class="form-label">Versão</label>
-                    <select class="form-select" name="versao_edicao">
-                        <option <?= $item['edicao_versao']=='Primeira Prensagem'?'selected':'' ?>>Primeira Prensagem</option>
-                        <option <?= $item['edicao_versao']=='Reedição'?'selected':'' ?>>Reedição</option>
-                        <option <?= $item['edicao_versao']=='Delux'?'selected':'' ?>>Delux</option>
-                        <option <?= $item['edicao_versao']=='Super delux'?'selected':'' ?>>Super delux</option>
-                    </select>
                 </div>
 
                 <div class="col-md-4">
